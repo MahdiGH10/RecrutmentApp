@@ -1,0 +1,178 @@
+@{
+    ViewData["Title"] = "Accueil";
+}
+
+<section class="landing-page">
+    <section class="landing-hero-shell">
+        <div class="hero-badge"><span class="hero-badge-dot"></span> +2 400 offres publiées ce mois</div>
+        <h1>Trouvez le talent<br />qu'il vous faut — <span>rapidement.</span></h1>
+        <p class="hero-sub">La plateforme de recrutement tunisienne qui connecte candidats qualifiés et recruteurs sérieux, avec des outils pensés pour aller à l'essentiel.</p>
+
+        <div class="hero-ctas">
+            <a asp-controller="Account" asp-action="Register" asp-route-type="Candidat" class="btn btn-primary btn-lg">Je cherche un emploi</a>
+            <a asp-controller="Account" asp-action="Register" asp-route-type="Recruteur" class="btn btn-white btn-lg">Je recrute</a>
+        </div>
+
+        <form asp-controller="Offres" asp-action="Index" method="get" class="hero-searchbar" role="search">
+            <span class="hero-searchbar-icon" aria-hidden="true">⌕</span>
+            <input name="search" placeholder="Titre, compétence, entreprise..." />
+            <div class="hero-searchbar-divider"></div>
+            <select name="zone">
+                <option value="">📍 Toute la Tunisie</option>
+                <option value="Tunis">Tunis</option>
+                <option value="Sfax">Sfax</option>
+                <option value="Sousse">Sousse</option>
+            </select>
+            <button class="btn btn-primary hero-searchbar-btn" type="submit">Rechercher</button>
+        </form>
+
+        <div class="hero-tags">
+            <span class="hero-tag">💼 Développeur</span>
+            <span class="hero-tag">📊 Data Analyst</span>
+            <span class="hero-tag">🎨 UI/UX Designer</span>
+            <span class="hero-tag">📣 Marketing Digital</span>
+            <span class="hero-tag">🏦 Finance</span>
+        </div>
+    </section>
+
+    <section class="stats-bar">
+        <div class="stat-item"><div class="stat-num">12<span>K+</span></div><div class="stat-label">Candidats inscrits</div></div>
+        <div class="stat-item"><div class="stat-num">840<span>+</span></div><div class="stat-label">Recruteurs actifs</div></div>
+        <div class="stat-item"><div class="stat-num">2.4<span>K</span></div><div class="stat-label">Offres ce mois</div></div>
+        <div class="stat-item"><div class="stat-num">94<span>%</span></div><div class="stat-label">Taux de satisfaction</div></div>
+    </section>
+
+    <section class="section">
+        <div class="features-layout">
+            <div>
+                <div class="section-header">
+                    <div class="section-tag">Fonctionnalités</div>
+                    <h2 class="section-title">Tout ce dont vous avez<br />besoin, <span>en un seul endroit.</span></h2>
+                    <p class="section-sub">De la publication d'une offre à la planification de l'entretien — le processus entier est guidé et fluide.</p>
+                </div>
+                <div class="feature-cards">
+                    <article class="feature-card">
+                        <div class="feature-card-accent"></div>
+                        <div class="feature-icon">⌕</div>
+                        <h4>Filtres intelligents</h4>
+                        <p>Salaire, zone, expérience, type de contrat — trouvez exactement ce qui correspond.</p>
+                    </article>
+                    <article class="feature-card">
+                        <div class="feature-card-accent"></div>
+                        <div class="feature-icon">▦</div>
+                        <h4>Suivi candidatures</h4>
+                        <p>Dashboard complet : en attente, acceptées, entretiens planifiés — tout visible.</p>
+                    </article>
+                    <article class="feature-card">
+                        <div class="feature-card-accent"></div>
+                        <div class="feature-icon">◔</div>
+                        <h4>Planif. entretien</h4>
+                        <p>Le recruteur propose, le candidat confirme sa disponibilité en un clic.</p>
+                    </article>
+                    <article class="feature-card">
+                        <div class="feature-card-accent"></div>
+                        <div class="feature-icon">⚑</div>
+                        <h4>Notifications</h4>
+                        <p>Alertes en temps réel à chaque changement de statut ou entretien programmé.</p>
+                    </article>
+                </div>
+            </div>
+
+            <div class="feature-mockup">
+                <div class="mock-topbar">
+                    <span class="mock-dot" style="background:#EF4444"></span>
+                    <span class="mock-dot" style="background:#EAB308"></span>
+                    <span class="mock-dot" style="background:#22C55E"></span>
+                    <span class="mock-title">Mes Candidatures</span>
+                </div>
+                <div class="mock-count">3 candidatures actives</div>
+                <div class="mock-screen">
+                    <div class="mock-row">
+                        <div class="mock-avatar accent">MA</div>
+                        <div class="mock-info">
+                            <div class="mock-name">Développeur Full Stack</div>
+                            <div class="mock-meta">TechCorp · Tunis</div>
+                        </div>
+                        <span class="mock-badge badge-ent">📅 Entretien</span>
+                    </div>
+                    <div class="mock-row">
+                        <div class="mock-avatar success">DS</div>
+                        <div class="mock-info">
+                            <div class="mock-name">Data Analyst Senior</div>
+                            <div class="mock-meta">DataSys · Remote</div>
+                        </div>
+                        <span class="mock-badge badge-acc">✓ Acceptée</span>
+                    </div>
+                    <div class="mock-row">
+                        <div class="mock-avatar muted">SN</div>
+                        <div class="mock-info">
+                            <div class="mock-name">UX Designer</div>
+                            <div class="mock-meta">SnapNet · Sfax</div>
+                        </div>
+                        <span class="mock-badge badge-att">⏳ Attente</span>
+                    </div>
+                </div>
+                <div class="mock-note">
+                    <strong>📅 Entretien demain — 10h00</strong>
+                    <span>TechCorp · Lien Google Meet</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="how-bg">
+        <div class="section-header center">
+            <div class="section-tag">Comment ça marche</div>
+            <h2 class="section-title">3 étapes pour <span>décrocher votre prochain poste</span></h2>
+        </div>
+        <div class="steps-grid">
+            <div class="step">
+                <div class="step-num">1</div>
+                <h4>Créez votre profil</h4>
+                <p>Inscrivez-vous en 2 minutes, ajoutez votre CV et vos préférences de poste.</p>
+            </div>
+            <div class="step">
+                <div class="step-num active">2</div>
+                <h4>Explorez et postulez</h4>
+                <p>Filtrez les offres par salaire, zone et expérience. Postulez en un clic.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <h4>Décrochez l'entretien</h4>
+                <p>Suivez vos candidatures et confirmez vos disponibilités pour les entretiens.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="testimonial-section">
+        <div class="stars">★★★★★</div>
+        <p class="testimonial-quote">"Grâce à RecruitApp, j'ai trouvé mon poste en <span>moins de 3 semaines</span>. Les filtres sont précis et le suivi des candidatures m'a vraiment aidé à rester organisé."</p>
+        <div class="testimonial-author">
+            <div class="t-avatar">AK</div>
+            <div>
+                <div class="t-name">Amine Khelil</div>
+                <div class="t-role">Développeur React — Tunis</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <h2>Prêt à <span>commencer ?</span></h2>
+        <p>Rejoignez plus de 12 000 candidats et 840 recruteurs qui font confiance à RecruitApp.</p>
+        <div class="cta-btns">
+            <a asp-controller="Account" asp-action="Register" asp-route-type="Candidat" class="btn btn-primary btn-lg">Je cherche un emploi</a>
+            <a asp-controller="Account" asp-action="Register" asp-route-type="Recruteur" class="btn btn-outline btn-lg">Je recrute</a>
+        </div>
+    </section>
+
+    <footer class="landing-footer">
+        <div class="footer-brand">Recruit<span>App</span></div>
+        <div class="footer-links">
+            <span class="footer-link">À propos</span>
+            <span class="footer-link">Confidentialité</span>
+            <span class="footer-link">CGU</span>
+            <span class="footer-link">Contact</span>
+        </div>
+        <div class="footer-copy">© 2026 RecruitApp · Tunisie</div>
+    </footer>
+</section>

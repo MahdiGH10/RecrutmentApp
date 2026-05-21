@@ -1,0 +1,59 @@
+@model RecruitApp.ViewModels.OffreListViewModel
+@{
+    ViewData["Title"] = "Mes offres";
+}
+
+<section class="page-hero dashboard-hero">
+    <div>
+        <p class="eyebrow">Espace recruteur</p>
+        <h1>Mes offres</h1>
+        <p class="hero-copy">Retrouvez et gérez toutes vos annonces publiées, avec un accès rapide à la consultation et à l’édition.</p>
+    </div>
+    <div class="page-actions">
+        <a asp-action="Create" class="btn btn-primary">+ Nouvelle offre</a>
+        <a asp-action="Dashboard" class="btn btn-secondary">Retour dashboard</a>
+    </div>
+</section>
+
+@if (!Model.Offres.Any())
+{
+    <div class="empty-state card-surface">
+        <h3>Aucune offre publiée pour le moment.</h3>
+        <p>Créez votre première annonce pour commencer à recevoir des candidatures.</p>
+        <a asp-action="Create" class="btn btn-primary">Publier une offre</a>
+    </div>
+}
+else
+{
+    <div class="offer-grid">
+        @foreach (var offre in Model.Offres)
+        {
+            <article class="offer-card">
+                <div class="offer-head">
+                    <div>
+                        <div class="offer-company">@offre.Zone</div>
+                        <h2 class="offer-title">@offre.Titre</h2>
+                    </div>
+                    <span class="badge badge-actif">@offre.Type</span>
+                </div>
+                <p class="offer-description">@offre.Description</p>
+                <div class="offer-meta offer-meta-compact">
+                    <span>📍 @offre.Zone</span>
+                    <span>💼 @offre.ExperienceRequise ans</span>
+                    <span>💰 @offre.SalaireMin.ToString("N0") - @offre.SalaireMax.ToString("N0") TND</span>
+                </div>
+                <div class="offer-footer offer-footer-wrap">
+                    <small>@offre.PublieeAt.ToString("dd/MM/yyyy")</small>
+                    <div class="offer-actions">
+                        <a asp-controller="Offres" asp-action="Detail" asp-route-id="@offre.Id" class="btn btn-secondary btn-sm">Voir</a>
+                        <a asp-action="Edit" asp-route-id="@offre.Id" class="btn btn-secondary btn-sm">Modifier</a>
+                        <form asp-action="Delete" method="post" class="d-inline">
+                            <input type="hidden" name="id" value="@offre.Id" />
+                            <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+                        </form>
+                    </div>
+                </div>
+            </article>
+        }
+    </div>
+}

@@ -1,0 +1,79 @@
+@model IEnumerable<RecruitApp.Models.ApplicationUser>
+@{
+    ViewData["Title"] = "Recruteurs";
+    var recruiters = Model.ToList();
+}
+
+<section class="page-hero dashboard-hero">
+    <div>
+        <p class="eyebrow">Validation</p>
+        <h1>Recruteurs</h1>
+        <p class="hero-copy">Consultez les demandes recruteurs, vérifiez l'entreprise, puis confirmez les comptes fiables.</p>
+    </div>
+</section>
+
+@if (recruiters.Count == 0)
+{
+    <div class="empty-state card-surface">
+        <h3>Aucun recruteur à valider.</h3>
+        <p>Les nouveaux comptes recruteurs apparaîtront ici dès leur inscription.</p>
+    </div>
+}
+else
+{
+    <div class="table-wrap elevated-table">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Email</th>
+                    <th>Entreprise</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var recruiter in recruiters)
+                {
+                    <tr>
+                        <td>
+                            <a asp-action="RecruteurDetails" asp-route-id="@recruiter.Id" class="table-primary-link">
+                                @recruiter.Prenom @recruiter.Nom
+                            </a>
+                        </td>
+                        <td>@recruiter.Email</td>
+                        <td>
+                            <strong>@(string.IsNullOrWhiteSpace(recruiter.CompanyName) ? "-" : recruiter.CompanyName)</strong>
+                            @if (!string.IsNullOrWhiteSpace(recruiter.CompanyDomain))
+                            {
+                                <span class="table-muted-line">@recruiter.CompanyDomain</span>
+                            }
+                        </td>
+                        <td>
+                            @if (recruiter.IsValidated)
+                            {
+                                <span class="badge badge-acceptee">Validé</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-attente">En attente</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="table-actions">
+                                <a asp-action="RecruteurDetails" asp-route-id="@recruiter.Id" class="btn btn-secondary btn-sm">Voir</a>
+                                @if (!recruiter.IsValidated)
+                                {
+                                    <form asp-action="Valider" method="post" class="d-inline">
+                                        <input type="hidden" name="id" value="@recruiter.Id" />
+                                        <button type="submit" class="btn btn-primary btn-sm">Confirmer</button>
+                                    </form>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

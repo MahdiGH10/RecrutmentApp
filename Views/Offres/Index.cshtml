@@ -1,0 +1,89 @@
+@model RecruitApp.ViewModels.OffreListViewModel
+@{
+    ViewData["Title"] = "Offres";
+    var totalOffres = (Model.Offres as ICollection<RecruitApp.Models.Offre>)?.Count ?? 0;
+    const int totalTypes = 5;
+}
+
+<section class="page-hero offer-hero">
+    <div>
+        <p class="eyebrow">Marché tunisien</p>
+        <h1>Offres d'emploi</h1>
+        <p class="hero-copy">Explorez les postes disponibles et filtrez par zone, mot-clé ou type de contrat.</p>
+    </div>
+
+    <div class="hero-stats">
+        <div>
+            <strong>@totalOffres</strong>
+            <span>Offres trouvées</span>
+        </div>
+        <div>
+            <strong>@totalTypes</strong>
+            <span>Types de contrat</span>
+        </div>
+    </div>
+</section>
+
+<form method="get" class="filter-panel card-surface mb-4">
+    <div class="row g-3 align-items-end">
+        <div class="col-lg-5 col-md-6">
+            <label class="form-label">Recherche</label>
+            <input name="search" value="@Model.Search" class="form-control" placeholder="ex: développeur React" />
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <label class="form-label">Zone</label>
+            <input name="zone" value="@Model.Zone" class="form-control" placeholder="Tunis, Sfax..." />
+        </div>
+        <div class="col-lg-2 col-md-6">
+            <label class="form-label">Type</label>
+            <select name="type" class="form-select">
+                <option value="">Tous</option>
+                @foreach (var item in Enum.GetValues<RecruitApp.Models.Enums.TypeOffre>())
+                {
+                    if (Model.Type == item)
+                    {
+                        <option value="@item" selected>@item</option>
+                    }
+                    else
+                    {
+                        <option value="@item">@item</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="col-lg-2 col-md-6 d-grid">
+            <button type="submit" class="btn btn-primary">Filtrer</button>
+        </div>
+    </div>
+</form>
+
+<div class="offer-grid">
+    @foreach (var offre in Model.Offres)
+    {
+        <article class="offer-card">
+            <div class="offer-head">
+                <div class="offer-company-block">
+                    <span class="card-logo">@((offre.Recruteur?.Nom ?? "RA").Substring(0, 1).ToUpper())</span>
+                    <div>
+                        <div class="offer-company">@offre.Recruteur?.Nom @offre.Recruteur?.Prenom</div>
+                        <h2 class="offer-title">@offre.Titre</h2>
+                    </div>
+                </div>
+                <span class="badge badge-actif">@offre.Type</span>
+            </div>
+
+            <p class="offer-description">@offre.Description</p>
+
+            <div class="offer-meta">
+                <span>Zone: @offre.Zone</span>
+                <span>Expérience: @offre.ExperienceRequise ans</span>
+                <span>Salaire: @offre.SalaireMin.ToString("N0") - @offre.SalaireMax.ToString("N0") TND</span>
+            </div>
+
+            <div class="offer-footer">
+                <small>Publié le @offre.PublieeAt.ToString("dd/MM/yyyy")</small>
+                <a asp-action="Detail" asp-route-id="@offre.Id" class="btn btn-secondary btn-sm">Voir l'offre</a>
+            </div>
+        </article>
+    }
+</div>

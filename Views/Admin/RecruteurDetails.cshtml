@@ -1,0 +1,93 @@
+@model RecruitApp.Models.ApplicationUser
+@{
+    ViewData["Title"] = "Détail recruteur";
+}
+
+<section class="page-hero dashboard-hero">
+    <div>
+        <p class="eyebrow">Validation recruteur</p>
+        <h1>@Model.Prenom @Model.Nom</h1>
+        <p class="hero-copy">Consultez les informations du recruteur et de son entreprise avant confirmation.</p>
+    </div>
+    <div class="page-actions">
+        <a asp-action="Recruteurs" class="btn btn-secondary">Retour</a>
+        @if (!Model.IsValidated)
+        {
+            <form asp-action="Valider" method="post" class="d-inline">
+                <input type="hidden" name="id" value="@Model.Id" />
+                <button type="submit" class="btn btn-primary">Confirmer le recruteur</button>
+            </form>
+        }
+    </div>
+</section>
+
+<div class="detail-info-grid">
+    <section class="card-surface">
+        <h2 class="panel-title">Contact</h2>
+        <dl class="info-list">
+            <div>
+                <dt>Nom</dt>
+                <dd>@Model.Prenom @Model.Nom</dd>
+            </div>
+            <div>
+                <dt>Email</dt>
+                <dd>@Model.Email</dd>
+            </div>
+            <div>
+                <dt>Statut</dt>
+                <dd>
+                    @if (Model.IsValidated)
+                    {
+                        <span class="badge badge-acceptee">Validé</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-attente">En attente</span>
+                    }
+                </dd>
+            </div>
+            <div>
+                <dt>Inscrit le</dt>
+                <dd>@Model.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd>
+            </div>
+        </dl>
+    </section>
+
+    <section class="card-surface">
+        <h2 class="panel-title">Entreprise</h2>
+        <dl class="info-list">
+            <div>
+                <dt>Nom de l'entreprise</dt>
+                <dd>@(string.IsNullOrWhiteSpace(Model.CompanyName) ? "-" : Model.CompanyName)</dd>
+            </div>
+            <div>
+                <dt>Domaine</dt>
+                <dd>@(string.IsNullOrWhiteSpace(Model.CompanyDomain) ? "-" : Model.CompanyDomain)</dd>
+            </div>
+            <div>
+                <dt>Site web</dt>
+                <dd>
+                    @if (!string.IsNullOrWhiteSpace(Model.CompanyWebsite))
+                    {
+                        <a href="@Model.CompanyWebsite" target="_blank" rel="noopener">@Model.CompanyWebsite</a>
+                    }
+                    else
+                    {
+                        <span>-</span>
+                    }
+                </dd>
+            </div>
+            <div>
+                <dt>Adresse</dt>
+                <dd>@(string.IsNullOrWhiteSpace(Model.CompanyAddress) ? "-" : Model.CompanyAddress)</dd>
+            </div>
+        </dl>
+    </section>
+</div>
+
+<section class="card-surface dashboard-panel">
+    <h2 class="panel-title">Description</h2>
+    <p class="hero-copy mb-0">
+        @(string.IsNullOrWhiteSpace(Model.CompanyDescription) ? "Aucune description fournie." : Model.CompanyDescription)
+    </p>
+</section>

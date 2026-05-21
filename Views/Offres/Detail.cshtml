@@ -1,0 +1,125 @@
+@model RecruitApp.ViewModels.OffreDetailViewModel
+@{
+    ViewData["Title"] = "Détail de l'offre";
+
+    var applicationBadgeClass = Model.ApplicationStatus switch
+    {
+        RecruitApp.Models.Enums.StatutCandidature.Acceptee => "badge-acceptee",
+        RecruitApp.Models.Enums.StatutCandidature.Refusee => "badge-refusee",
+        RecruitApp.Models.Enums.StatutCandidature.EntretienPlanifie => "badge-entretien",
+        RecruitApp.Models.Enums.StatutCandidature.Vue => "badge-entretien",
+        _ => "badge-attente"
+    };
+}
+
+@if (Model.Offre is null)
+{
+    <div class="alert alert-warning">Offre introuvable.</div>
+}
+else
+{
+    <div class="detail-card">
+        <div class="detail-header">
+            <div>
+                <p class="eyebrow">@Model.Offre.Type</p>
+                <h1>@Model.Offre.Titre</h1>
+                <p class="detail-subtitle">@Model.Offre.Zone · @Model.Offre.ExperienceRequise ans d’expérience</p>
+            </div>
+            <span class="badge badge-actif">@((Model.Offre.IsActive) ? "Active" : "Inactive")</span>
+        </div>
+
+        <div class="detail-meta">
+            <span>💰 @Model.Offre.SalaireMin.ToString("N0") - @Model.Offre.SalaireMax.ToString("N0") TND</span>
+            <span>📅 Publiée le @Model.Offre.PublieeAt.ToString("dd/MM/yyyy")</span>
+            @if (Model.Offre.ExpiresAt.HasValue)
+            {
+                <span>⏳ Expire le @Model.Offre.ExpiresAt.Value.ToString("dd/MM/yyyy")</span>
+            }
+        </div>
+
+        <div class="detail-body">@Model.Offre.Description</div>
+
+        <div class="detail-grid">
+            <div class="detail-box">
+                <span>Zone</span>
+                <strong>@Model.Offre.Zone</strong>
+            </div>
+            <div class="detail-box">
+                <span>Expérience</span>
+                <strong>@Model.Offre.ExperienceRequise ans</strong>
+            </div>
+            <div class="detail-box">
+                <span>Contrat</span>
+                <strong>@Model.Offre.Type</strong>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.HintMessage))
+        {
+            <div class="alert alert-info mt-4">@Model.HintMessage</div>
+        }
+
+        <div class="detail-actions mt-4">
+            <a asp-action="Index" class="btn btn-secondary">Retour aux offres</a>
+            @if (Model.IsCandidate && Model.HasApplied)
+            {
+                <div class="application-panel">
+                    <div class="application-panel-head">
+                        <div>
+                            <p class="eyebrow">Candidature envoyée</p>
+                            <h3>Votre dossier est bien enregistré</h3>
+                        </div>
+                        <span class="badge @applicationBadgeClass">@Model.ApplicationStatus</span>
+                    </div>
+
+                    <div class="application-grid">
+                        <div class="application-box">
+                            <span>Date de postulation</span>
+                            <strong>@(Model.ApplicationDate.HasValue ? Model.ApplicationDate.Value.ToString("dd/MM/yyyy HH:mm") : "—")</strong>
+                        </div>
+                        <div class="application-box">
+                            <span>Statut</span>
+                            <strong>@Model.ApplicationStatus</strong>
+                        </div>
+                        <div class="application-box">
+                            <span>Entretien</span>
+                            <strong>@(Model.InterviewDate.HasValue ? Model.InterviewDate.Value.ToString("dd/MM/yyyy HH:mm") : "À planifier")</strong>
+                        </div>
+                        <div class="application-box">
+                            <span>Confirmation</span>
+                            <strong>@(Model.InterviewConfirmed.HasValue ? (Model.InterviewConfirmed.Value ? "Oui" : "Non") : "En attente")</strong>
+                        </div>
+                    </div>
+
+                    <p class="application-note">
+                        Vous pouvez suivre l’évolution depuis <a asp-controller="Candidat" asp-action="Candidatures">mes candidatures</a>.
+                    </p>
+                </div>
+            }
+            else if (Model.IsCandidate)
+            {
+                <form asp-action="Postuler" asp-route-id="@Model.Offre.Id" method="post" class="apply-form">
+                    <input type="hidden" name="OffreId" value="@Model.Offre.Id" />
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">Message de motivation</label>
+                            <textarea name="MessageMotivation" rows="4" class="form-control" placeholder="Expliquez brièvement votre intérêt pour ce poste..."></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">CV URL</label>
+                            <input name="CvUrl" class="form-control" placeholder="Lien vers votre CV (Drive, OneDrive...)" />
+                        </div>
+                    </div>
+                    <div class="apply-form-footer">
+                        <small class="text-muted">Votre candidature sera envoyée au recruteur dès validation.</small>
+                        <button type="submit" class="btn btn-primary">Postuler maintenant</button>
+                    </div>
+                </form>
+            }
+            else if (!Model.IsAuthenticated)
+            {
+                <a asp-controller="Account" asp-action="Login" class="btn btn-primary">Se connecter pour postuler</a>
+            }
+        </div>
+    </div>
+}

@@ -1,0 +1,58 @@
+@model IEnumerable<RecruitApp.Models.Entretien>
+@{
+    ViewData["Title"] = "Mes entretiens";
+    var entretiens = Model.ToList();
+    var total = entretiens.Count;
+    var aConfirmer = entretiens.Count(e => !e.IsConfirmedByCandidat);
+}
+
+<section class="page-hero dashboard-hero dashboard-hero-pro">
+    <div>
+        <p class="eyebrow">Espace candidat</p>
+        <h1>Mes entretiens</h1>
+        <p class="hero-copy">Confirmez les rendez-vous proposés par les recruteurs et gardez les détails sous la main.</p>
+    </div>
+</section>
+
+<div class="dashboard-grid dashboard-grid-pro mb-4">
+    <div class="stat-card stat-card-pro"><span>Entretiens</span><strong>@total</strong><small>Rendez-vous planifiés</small></div>
+    <div class="stat-card stat-card-pro"><span>À confirmer</span><strong>@aConfirmer</strong><small>Action requise de votre part</small></div>
+</div>
+
+@if (total == 0)
+{
+    <div class="empty-state card-surface">
+        <h3>Aucun entretien pour le moment.</h3>
+        <p>Quand un recruteur planifie une rencontre, elle apparaîtra ici avec un bouton de confirmation.</p>
+    </div>
+}
+else
+{
+    <div class="interview-grid">
+        @foreach (var entretien in entretiens)
+        {
+            <article class="interview-card">
+                <div>
+                    <span class="badge @(entretien.IsConfirmedByCandidat ? "badge-acceptee" : "badge-attente")">
+                        @(entretien.IsConfirmedByCandidat ? "Confirmé" : "À confirmer")
+                    </span>
+                    <h2>@entretien.Candidature?.Offre?.Titre</h2>
+                    <p>@entretien.DateHeure.ToString("dd/MM/yyyy HH:mm") · @entretien.Lieu</p>
+                    @if (!string.IsNullOrWhiteSpace(entretien.Notes))
+                    {
+                        <p class="interview-note">@entretien.Notes</p>
+                    }
+                </div>
+
+                @if (!entretien.IsConfirmedByCandidat)
+                {
+                    <form asp-action="ConfirmerEntretien" method="post" class="interview-actions">
+                        <input type="hidden" name="entretienId" value="@entretien.Id" />
+                        <button type="submit" name="confirmed" value="true" class="btn btn-primary">Confirmer</button>
+                        <button type="submit" name="confirmed" value="false" class="btn btn-secondary">Pas disponible</button>
+                    </form>
+                }
+            </article>
+        }
+    </div>
+}

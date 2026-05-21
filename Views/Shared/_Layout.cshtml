@@ -1,0 +1,67 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - RecruitApp</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/RecruitAPP.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="app-shell">
+        <header class="app-header">
+            <div class="brand-block">
+                <a class="brand-link" asp-controller="Home" asp-action="Index">Recruit<span>App</span></a>
+                <span class="brand-subtitle">Marché de l’emploi tunisien</span>
+            </div>
+
+            <nav class="top-actions">
+                <a class="top-link" asp-controller="Offres" asp-action="Index">Offres</a>
+                @if (User.Identity?.IsAuthenticated ?? false)
+                {
+                    <span class="role-pill">@User.Identity?.Name</span>
+                    <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-ghost">Déconnexion</button>
+                    </form>
+                }
+                else
+                {
+                    <a class="btn btn-secondary" asp-controller="Account" asp-action="Login">Connexion</a>
+                    <a class="btn btn-primary" asp-controller="Account" asp-action="Register">Créer un compte</a>
+                }
+            </nav>
+        </header>
+
+        <div class="app-body">
+            @if (User.Identity?.IsAuthenticated ?? false)
+            {
+                <aside class="app-sidebar">
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <partial name="_SidebarAdmin" />
+                    }
+                    else if (User.IsInRole("Recruteur"))
+                    {
+                        <partial name="_SidebarRecruteur" />
+                    }
+                    else
+                    {
+                        <partial name="_SidebarCandidat" />
+                    }
+                </aside>
+            }
+
+            <main class="app-main">
+                <partial name="_Notifications" />
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,89 @@
+@model IEnumerable<RecruitApp.Models.Document>
+@{
+    ViewData["Title"] = "Mes documents";
+    var documents = Model.ToList();
+    var total = documents.Count;
+    var cvCount = documents.Count(d => d.TypeDocument.Contains("CV", StringComparison.OrdinalIgnoreCase));
+    var uploadModel = ViewBag.UploadModel as RecruitApp.ViewModels.DocumentUploadViewModel ?? new RecruitApp.ViewModels.DocumentUploadViewModel();
+}
+
+<section class="page-hero dashboard-hero dashboard-hero-pro">
+    <div>
+        <p class="eyebrow">Espace candidat</p>
+        <h1>Mes documents</h1>
+        <p class="hero-copy">Préparez vos CV, lettres et pièces utiles pour postuler plus vite et plus proprement.</p>
+    </div>
+</section>
+
+<div class="dashboard-grid dashboard-grid-pro mb-4">
+    <div class="stat-card stat-card-pro"><span>Documents</span><strong>@total</strong><small>Fichiers disponibles</small></div>
+    <div class="stat-card stat-card-pro"><span>CV</span><strong>@cvCount</strong><small>Prêts pour candidature</small></div>
+</div>
+
+<div class="document-layout">
+    <section class="card-surface form-card document-upload-card">
+        <p class="eyebrow">Ajouter</p>
+        <h2 class="panel-title">Téléverser un document</h2>
+        <form asp-action="UploadDocument" method="post" enctype="multipart/form-data" class="auth-form">
+            <div>
+                <label class="form-label" for="Nom">Nom du document</label>
+                <input name="Nom" class="form-control" value="@uploadModel.Nom" placeholder="CV Mahdi 2026" />
+            </div>
+            <div>
+                <label class="form-label" for="TypeDocument">Type</label>
+                <select name="TypeDocument" class="form-select">
+                    <option value="CV">CV</option>
+                    <option value="Lettre de motivation">Lettre de motivation</option>
+                    <option value="Diplôme">Diplôme</option>
+                    <option value="Portfolio">Portfolio</option>
+                    <option value="Autre">Autre</option>
+                </select>
+            </div>
+            <div>
+                <label class="form-label">Fichier</label>
+                <input name="File" type="file" class="form-control document-upload-input" />
+            </div>
+            <button type="submit" class="btn btn-primary">Ajouter le document</button>
+        </form>
+    </section>
+
+    <section class="document-tips card-surface">
+        <p class="eyebrow">Conseils</p>
+        <h2 class="panel-title">Documents recommandés</h2>
+        <ul>
+            <li>Un CV récent et lisible en PDF.</li>
+            <li>Une lettre de motivation réutilisable.</li>
+            <li>Un portfolio ou lien de projet si le poste le demande.</li>
+        </ul>
+    </section>
+</div>
+
+@if (total == 0)
+{
+    <div class="empty-state card-surface mt-4">
+        <h3>Aucun document enregistré.</h3>
+        <p>Ajoutez au moins un CV pour rendre vos prochaines candidatures plus rapides.</p>
+    </div>
+}
+else
+{
+    <div class="document-grid mt-4">
+        @foreach (var document in documents)
+        {
+            <article class="document-card">
+                <div>
+                    <span class="badge badge-actif">@document.TypeDocument</span>
+                    <h3>@document.Nom</h3>
+                    <p>Ajouté le @document.UploadedAt.ToString("dd/MM/yyyy")</p>
+                </div>
+                <div class="document-actions">
+                    <a href="@document.Url" target="_blank" rel="noreferrer" class="btn btn-secondary btn-sm">Ouvrir</a>
+                    <form asp-action="DeleteDocument" method="post" class="d-inline">
+                        <input type="hidden" name="id" value="@document.Id" />
+                        <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+                    </form>
+                </div>
+            </article>
+        }
+    </div>
+}

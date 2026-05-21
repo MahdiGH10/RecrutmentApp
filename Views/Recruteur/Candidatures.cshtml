@@ -1,0 +1,148 @@
+@model RecruitApp.ViewModels.CandidatureViewModel
+@{
+    ViewData["Title"] = "Candidatures reçues";
+    var candidatures = Model.Candidatures.ToList();
+    var total = candidatures.Count;
+    var entretiens = candidatures.Count(c => c.Entretien is not null);
+    var enAttente = candidatures.Count(c => c.Statut == RecruitApp.Models.Enums.StatutCandidature.EnAttente);
+    var aPlanifier = candidatures.Count(c => c.Entretien is null);
+
+    string BadgeClass(RecruitApp.Models.Enums.StatutCandidature statut) => statut switch
+    {
+        RecruitApp.Models.Enums.StatutCandidature.Acceptee => "badge-acceptee",
+        RecruitApp.Models.Enums.StatutCandidature.Refusee => "badge-refusee",
+        RecruitApp.Models.Enums.StatutCandidature.EntretienPlanifie => "badge-entretien",
+        _ => "badge-attente"
+    };
+}
+
+<section class="page-hero dashboard-hero dashboard-hero-pro">
+    <div>
+        <p class="eyebrow">Espace recruteur</p>
+        <h1>Candidatures reçues</h1>
+        <p class="hero-copy">Changez les statuts, planifiez les entretiens et suivez la confirmation des candidats.</p>
+    </div>
+</section>
+
+<div class="dashboard-grid dashboard-grid-pro mb-4">
+    <div class="stat-card stat-card-pro"><span>Total</span><strong>@total</strong><small>Candidatures reçues</small></div>
+    <div class="stat-card stat-card-pro"><span>En attente</span><strong>@enAttente</strong><small>À traiter</small></div>
+    <div class="stat-card stat-card-pro"><span>Entretiens</span><strong>@entretiens</strong><small>Planifiés</small></div>
+    <div class="stat-card stat-card-pro"><span>À planifier</span><strong>@aPlanifier</strong><small>Sans créneau fixé</small></div>
+</div>
+
+<section class="card-surface recruiter-planning-banner">
+    <div class="panel-header-line">
+        <div>
+            <p class="eyebrow">Planification d’entretien</p>
+            <h2 class="panel-title">Un planning plus clair pour chaque candidature</h2>
+        </div>
+    </div>
+
+    <div class="planning-step-grid">
+        <div class="planning-step-card">
+            <span>1</span>
+            <strong>Choisir le bon statut</strong>
+            <p>Mettre à jour la candidature avant ou après le rendez-vous aide à garder un suivi net.</p>
+        </div>
+        <div class="planning-step-card">
+            <span>2</span>
+            <strong>Fixer date, heure et lieu</strong>
+            <p>Utilisez le formulaire d’entretien pour ajouter un lieu physique ou un lien visio.</p>
+        </div>
+        <div class="planning-step-card">
+            <span>3</span>
+            <strong>Ajouter des notes utiles</strong>
+            <p>Quelques lignes suffisent pour noter le contact, la durée ou les points à vérifier.</p>
+        </div>
+    </div>
+</section>
+
+@if (total == 0)
+{
+    <div class="empty-state card-surface">
+        <h3>Aucune candidature reçue pour le moment.</h3>
+        <p>Lorsque des candidats postulent à vos offres, elles apparaîtront ici.</p>
+    </div>
+}
+else
+{
+    <div class="recruiter-application-list">
+        @foreach (var item in candidatures)
+        {
+            <article class="recruiter-application-card">
+                <div class="candidate-summary">
+                    <div class="candidate-avatar">@((item.Candidat?.Prenom ?? "C").Substring(0, 1).ToUpper())</div>
+                    <div>
+                        <h2>@item.Candidat?.Prenom @item.Candidat?.Nom</h2>
+                        <p>@item.Candidat?.Email</p>
+                        <span>@item.Offre?.Titre · postulée le @item.PostuleeAt.ToString("dd/MM/yyyy")</span>
+                    </div>
+                </div>
+
+                <div class="candidate-status-panel">
+                    <span class="badge @BadgeClass(item.Statut)">@item.Statut</span>
+                    @if (item.Entretien is not null)
+                    {
+                        <div class="interview-summary">
+                            <span class="badge @(item.Entretien.IsConfirmedByCandidat ? "badge-acceptee" : "badge-entretien")">
+                                @(item.Entretien.IsConfirmedByCandidat ? "Entretien confirmé" : "Confirmation attendue")
+                            </span>
+                            <div class="interview-meta">
+                                <strong>@item.Entretien.DateHeure.ToString("dd/MM/yyyy HH:mm")</strong>
+                                <span>@item.Entretien.Lieu</span>
+                                @if (!string.IsNullOrWhiteSpace(item.Entretien.Notes))
+                                {
+                                    <p>@item.Entretien.Notes</p>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="candidate-actions-grid">
+                    <form asp-action="ChangerStatut" method="post" class="status-form">
+                        <input type="hidden" name="id" value="@item.Id" />
+                        <label class="form-label">Statut</label>
+                        <div class="inline-action">
+                            <select name="statut" class="form-select">
+                                @foreach (var statut in Enum.GetValues<RecruitApp.Models.Enums.StatutCandidature>())
+                                {
+                                    if (statut == item.Statut)
+                                    {
+                                        <option value="@statut" selected>@statut</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@statut">@statut</option>
+                                    }
+                                }
+                            </select>
+                            <button type="submit" class="btn btn-secondary">Mettre à jour</button>
+                        </div>
+                    </form>
+
+                    <form asp-action="PlanifierEntretien" method="post" class="schedule-form">
+                        <input type="hidden" name="candidatureId" value="@item.Id" />
+                        <label class="form-label">Planifier / replanifier un entretien</label>
+                        <div class="schedule-grid">
+                            <div>
+                                <input type="datetime-local" name="dateHeure" class="form-control" required />
+                                <small class="schedule-help">Sélectionnez le créneau avec précision.</small>
+                            </div>
+                            <div>
+                                <input type="text" name="lieu" class="form-control" placeholder="Lieu ou lien visio" required />
+                                <small class="schedule-help">Ex: bureau, salle 2, Google Meet...</small>
+                            </div>
+                            <div>
+                                <input type="text" name="notes" class="form-control" placeholder="Notes pour le candidat" />
+                                <small class="schedule-help">Durée, contact, documents à préparer.</small>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Planifier</button>
+                        </div>
+                    </form>
+                </div>
+            </article>
+        }
+    </div>
+}

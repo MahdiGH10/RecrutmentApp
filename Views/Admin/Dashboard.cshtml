@@ -1,0 +1,151 @@
+@model RecruitApp.ViewModels.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard admin";
+    var pendingRecruiters = Model.Recruteurs.Where(r => !r.IsValidated).Take(5).ToList();
+    var validatedRecruiters = Model.Recruteurs.Where(r => r.IsValidated).Take(5).ToList();
+    var recentCandidates = Model.Candidats.OrderByDescending(c => c.CreatedAt).Take(5).ToList();
+    var pendingCount = Model.Recruteurs.Count(r => !r.IsValidated);
+    var validatedCount = Model.Recruteurs.Count(r => r.IsValidated);
+}
+
+<section class="page-hero dashboard-hero dashboard-hero-pro">
+    <div>
+        <p class="eyebrow">Espace admin</p>
+        <h1>Tableau de bord</h1>
+        <p class="hero-copy">Surveillez la plateforme, les comptes à valider et les indicateurs importants.</p>
+    </div>
+    <div class="page-actions">
+        <a asp-action="Recruteurs" class="btn btn-primary">Valider les recruteurs</a>
+    </div>
+</section>
+
+<div class="dashboard-grid dashboard-grid-pro mb-4">
+    <div class="stat-card stat-card-pro"><span>Offres actives</span><strong>@Model.TotalOffres</strong><small>Annonces visibles</small></div>
+    <div class="stat-card stat-card-pro"><span>Candidatures</span><strong>@Model.TotalCandidatures</strong><small>Dossiers reçus</small></div>
+    <div class="stat-card stat-card-pro"><span>Entretiens</span><strong>@Model.TotalEntretiens</strong><small>Rendez-vous planifiés</small></div>
+    <div class="stat-card stat-card-pro"><span>Recruteurs</span><strong>@Model.TotalRecruteurs</strong><small>Comptes entreprise</small></div>
+    <div class="stat-card stat-card-pro"><span>Candidats</span><strong>@Model.TotalCandidats</strong><small>Profils inscrits</small></div>
+</div>
+
+<div class="admin-detail-grid">
+    <section class="card-surface admin-insight-card admin-insight-card-highlight">
+        <div class="panel-header-line">
+            <div>
+                <p class="eyebrow">Vue d’ensemble</p>
+                <h2 class="panel-title">Santé de la plateforme</h2>
+            </div>
+        </div>
+        <div class="admin-mini-grid">
+            <div>
+                <span>En attente</span>
+                <strong>@pendingCount</strong>
+                <small>recruteurs à valider</small>
+            </div>
+            <div>
+                <span>Validés</span>
+                <strong>@validatedCount</strong>
+                <small>recruteurs actifs</small>
+            </div>
+            <div>
+                <span>Totaux</span>
+                <strong>@Model.TotalOffres</strong>
+                <small>offres actives publiées</small>
+            </div>
+            <div>
+                <span>Flux</span>
+                <strong>@Model.TotalEntretiens</strong>
+                <small>entretiens suivis</small>
+            </div>
+        </div>
+    </section>
+
+    <section class="card-surface admin-insight-card">
+        <div class="panel-header-line">
+            <div>
+                <p class="eyebrow">Action rapide</p>
+                <h2 class="panel-title">Priorités admin</h2>
+            </div>
+        </div>
+        <div class="admin-action-stack">
+            <div class="admin-action-item">
+                <strong>Valider les recruteurs</strong>
+                <span>Ouvrez la liste des comptes en attente et confirmez ceux qui sont fiables.</span>
+            </div>
+            <div class="admin-action-item">
+                <strong>Surveiller les tendances</strong>
+                <span>Regardez les offres, candidatures et entretiens pour repérer les pics d’activité.</span>
+            </div>
+            <div class="admin-action-item">
+                <strong>Garder la qualité</strong>
+                <span>Vérifiez les profils entreprise avant qu’ils ne publient sur la plateforme.</span>
+            </div>
+        </div>
+    </section>
+</div>
+
+<section class="dashboard-panel card-surface">
+    <div class="panel-header-line">
+        <div>
+            <p class="eyebrow">Validation</p>
+            <h2 class="panel-title">Recruteurs en attente</h2>
+        </div>
+        <a asp-action="Recruteurs" class="btn btn-secondary btn-sm">Tout voir</a>
+    </div>
+
+    @if (pendingRecruiters.Count == 0)
+    {
+        <p class="hero-copy mb-0">Aucun compte recruteur en attente pour le moment.</p>
+    }
+    else
+    {
+        <div class="admin-list-grid">
+            <div>
+                <h3 class="subsection-title">À valider</h3>
+                <div class="compact-list">
+                    @foreach (var recruiter in pendingRecruiters)
+                    {
+                        <a asp-action="RecruteurDetails" asp-route-id="@recruiter.Id" class="compact-list-item">
+                            <div>
+                                <strong>@recruiter.Prenom @recruiter.Nom</strong>
+                                <span>@(string.IsNullOrWhiteSpace(recruiter.CompanyName) ? recruiter.Email : recruiter.CompanyName)</span>
+                            </div>
+                            <span class="badge badge-attente">En attente</span>
+                        </a>
+                    }
+                </div>
+            </div>
+
+            <div>
+                <h3 class="subsection-title">Recruteurs validés</h3>
+                <div class="compact-list">
+                    @foreach (var recruiter in validatedRecruiters)
+                    {
+                        <a asp-action="RecruteurDetails" asp-route-id="@recruiter.Id" class="compact-list-item">
+                            <div>
+                                <strong>@recruiter.Prenom @recruiter.Nom</strong>
+                                <span>@(string.IsNullOrWhiteSpace(recruiter.CompanyName) ? recruiter.Email : recruiter.CompanyName)</span>
+                            </div>
+                            <span class="badge badge-acceptee">Validé</span>
+                        </a>
+                    }
+                </div>
+            </div>
+
+            <div>
+                <h3 class="subsection-title">Candidats récents</h3>
+                <div class="compact-list">
+                    @foreach (var candidate in recentCandidates)
+                    {
+                        <div class="compact-list-item compact-list-item-static">
+                            <div>
+                                <strong>@candidate.Prenom @candidate.Nom</strong>
+                                <span>@candidate.Email</span>
+                            </div>
+                            <span class="badge badge-actif">Candidat</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</section>

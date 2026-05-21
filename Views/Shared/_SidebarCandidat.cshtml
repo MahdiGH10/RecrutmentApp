@@ -1,0 +1,24 @@
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<RecruitApp.Models.ApplicationUser> UserManager
+@inject RecruitApp.Services.ICandidatureService CandidatureService
+@{
+    var currentUser = await UserManager.GetUserAsync(User);
+    var unreadCount = currentUser is null
+        ? 0
+        : await CandidatureService.CountUnreadCandidateNotificationsAsync(currentUser.Id);
+}
+
+<nav class="sidebar-nav">
+    <div class="sidebar-title">Candidat</div>
+    <a asp-controller="Offres" asp-action="Index" class="sidebar-link"><span class="sidebar-icon">□</span> Offres d'emploi</a>
+    <a asp-controller="Candidat" asp-action="Candidatures" class="sidebar-link">
+        <span class="sidebar-icon">◇</span>
+        <span>Mes candidatures</span>
+        @if (unreadCount > 0)
+        {
+            <span class="sidebar-count">@unreadCount</span>
+        }
+    </a>
+    <a asp-controller="Candidat" asp-action="Entretiens" class="sidebar-link"><span class="sidebar-icon">○</span> Mes entretiens</a>
+    <a asp-controller="Candidat" asp-action="Documents" class="sidebar-link"><span class="sidebar-icon">▤</span> Mes documents</a>
+</nav>

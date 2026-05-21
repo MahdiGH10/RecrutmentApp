@@ -1,0 +1,84 @@
+@model RecruitApp.ViewModels.CandidatureViewModel
+@{
+    ViewData["Title"] = "Mes candidatures";
+    var candidatures = Model.Candidatures.ToList();
+    var total = candidatures.Count;
+    var nouvelles = candidatures.Count(c => !c.IsSeenByCandidat);
+    var enAttente = candidatures.Count(c => c.Statut == RecruitApp.Models.Enums.StatutCandidature.EnAttente);
+    var entretiens = candidatures.Count(c => c.Entretien is not null);
+
+    string BadgeClass(RecruitApp.Models.Enums.StatutCandidature statut) => statut switch
+    {
+        RecruitApp.Models.Enums.StatutCandidature.Acceptee => "badge-acceptee",
+        RecruitApp.Models.Enums.StatutCandidature.Refusee => "badge-refusee",
+        RecruitApp.Models.Enums.StatutCandidature.EntretienPlanifie => "badge-entretien",
+        _ => "badge-attente"
+    };
+}
+
+<section class="page-hero dashboard-hero dashboard-hero-pro">
+    <div>
+        <p class="eyebrow">Espace candidat</p>
+        <h1>Mes candidatures</h1>
+        <p class="hero-copy">Suivez les réponses des recruteurs, les entretiens planifiés et l'avancement de chaque dossier.</p>
+    </div>
+    <div class="page-actions">
+        <a asp-controller="Offres" asp-action="Index" class="btn btn-primary">Voir les offres</a>
+    </div>
+</section>
+
+<div class="dashboard-grid dashboard-grid-pro mb-4">
+    <div class="stat-card stat-card-pro"><span>Total</span><strong>@total</strong><small>Candidatures envoyées</small></div>
+    <div class="stat-card stat-card-pro"><span>Nouvelles réponses</span><strong>@nouvelles</strong><small>Depuis votre dernière visite</small></div>
+    <div class="stat-card stat-card-pro"><span>En attente</span><strong>@enAttente</strong><small>Réponse recruteur attendue</small></div>
+    <div class="stat-card stat-card-pro"><span>Entretiens</span><strong>@entretiens</strong><small>Planifiés ou à confirmer</small></div>
+</div>
+
+@if (total == 0)
+{
+    <div class="empty-state card-surface">
+        <h3>Vous n'avez encore postulé à aucune offre.</h3>
+        <p>Explorez les opportunités disponibles et envoyez votre première candidature.</p>
+        <a asp-controller="Offres" asp-action="Index" class="btn btn-primary">Voir les offres</a>
+    </div>
+}
+else
+{
+    <div class="application-list">
+        @foreach (var item in candidatures)
+        {
+            <article class="application-item @(item.IsSeenByCandidat ? "" : "is-new")">
+                <div class="application-main">
+                    <div class="application-title-row">
+                        <h2>@item.Offre?.Titre</h2>
+                        @if (!item.IsSeenByCandidat)
+                        {
+                            <span class="badge badge-actif">Nouveau</span>
+                        }
+                    </div>
+                    <div class="application-meta">
+                        <span>Postulée le @item.PostuleeAt.ToString("dd/MM/yyyy")</span>
+                        @if (!string.IsNullOrWhiteSpace(item.Offre?.Zone))
+                        {
+                            <span>@item.Offre.Zone</span>
+                        }
+                    </div>
+                    @if (item.Entretien is not null)
+                    {
+                        <div class="application-interview-note">
+                            Entretien: @item.Entretien.DateHeure.ToString("dd/MM/yyyy HH:mm") · @item.Entretien.Lieu
+                            @if (!item.Entretien.IsConfirmedByCandidat)
+                            {
+                                <span class="badge badge-attente">À confirmer</span>
+                            }
+                        </div>
+                    }
+                </div>
+                <div class="application-side">
+                    <span class="badge @BadgeClass(item.Statut)">@item.Statut</span>
+                    <a asp-controller="Offres" asp-action="Detail" asp-route-id="@item.OffreId" class="btn btn-secondary btn-sm">Voir l'offre</a>
+                </div>
+            </article>
+        }
+    </div>
+}

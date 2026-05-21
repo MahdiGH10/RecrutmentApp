@@ -1,0 +1,68 @@
+@model RecruitApp.ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "Connexion";
+}
+
+<div class="auth-shell">
+    <div class="auth-layout">
+        <aside class="auth-aside auth-aside-login">
+            <p class="eyebrow auth-eyebrow">Bienvenue</p>
+            <h1>Connectez-vous à votre espace RecruitApp.</h1>
+            <p>
+                Accédez à vos offres, vos candidatures et vos entretiens dans une interface pensée pour aller vite.
+            </p>
+
+            <div class="auth-badges">
+                <span>Offres publiques</span>
+                <span>Candidatures</span>
+                <span>Entretiens</span>
+                <span>Documents</span>
+            </div>
+
+            <div class="auth-note">
+                <strong>Compte démo admin</strong>
+                <span>admin@recruitapp.tn · Admin@12345</span>
+            </div>
+
+            <div class="auth-note">
+                <strong>Recruteurs</strong>
+                <span>Si votre compte n'a pas été validé, vous verrez un message de blocage au moment de vous connecter.</span>
+            </div>
+        </aside>
+
+        <div class="auth-card auth-card-compact">
+            <div class="auth-header">
+                <h2>Connexion</h2>
+                <p>Entrez vos identifiants pour continuer.</p>
+            </div>
+
+            <form asp-action="Login" method="post" class="auth-form">
+                <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" class="form-control form-control-lg" placeholder="nom@exemple.com" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label"></label>
+                    <input asp-for="Password" type="password" class="form-control form-control-lg" placeholder="Votre mot de passe" />
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+                <div class="form-check mb-4">
+                    <input asp-for="RememberMe" class="form-check-input" />
+                    <label asp-for="RememberMe" class="form-check-label"></label>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Se connecter</button>
+            </form>
+
+            <div class="auth-footer">
+                <span>Pas encore de compte ?</span>
+                <a asp-action="Register">Créer un compte</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

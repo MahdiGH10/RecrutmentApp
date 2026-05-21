@@ -1,0 +1,55 @@
+@{
+    ViewData["Title"] = "Dashboard recruteur";
+}
+
+<section class="page-hero dashboard-hero dashboard-hero-pro">
+    <div>
+        <p class="eyebrow">Espace recruteur</p>
+        <h1>Dashboard</h1>
+        <p class="hero-copy">Pilotez vos offres, traitez les candidatures et planifiez les entretiens depuis un espace clair.</p>
+    </div>
+    <div class="page-actions">
+        <a asp-action="Create" class="btn btn-primary">Nouvelle offre</a>
+        <a asp-action="Candidatures" class="btn btn-secondary">Candidatures</a>
+    </div>
+</section>
+
+<div class="dashboard-grid dashboard-grid-pro mb-4">
+    <div class="stat-card stat-card-pro">
+        <span>Offres publiées</span>
+        <strong>@ViewBag.TotalOffres</strong>
+        <small>Gérez vos annonces et leur visibilité.</small>
+    </div>
+    <div class="stat-card stat-card-pro">
+        <span>Candidatures reçues</span>
+        <strong>@ViewBag.TotalCandidatures</strong>
+        <small>Répondez vite pour garder un suivi propre.</small>
+    </div>
+    <div class="stat-card stat-card-pro">
+        <span>Offres actives</span>
+        <strong>@ViewBag.TotalActives</strong>
+        <small>Opportunités actuellement visibles.</small>
+    </div>
+</div>
+
+<section class="dashboard-panel card-surface recruiter-command-panel">
+    <div>
+        <p class="eyebrow">Actions principales</p>
+        <h2 class="panel-title">Votre prochain mouvement</h2>
+        <p class="hero-copy mb-0">Publiez une offre, ajustez vos annonces ou traitez les réponses candidates.</p>
+    </div>
+    <div class="command-grid">
+        <a asp-action="Create" class="command-card">
+            <strong>Publier une offre</strong>
+            <span>Ajouter poste, zone, salaire et type de contrat.</span>
+        </a>
+        <a asp-action="MesOffres" class="command-card">
+            <strong>Gérer mes offres</strong>
+            <span>Modifier, activer ou supprimer vos annonces.</span>
+        </a>
+        <a asp-action="Candidatures" class="command-card">
+            <strong>Traiter les candidatures</strong>
+            <span>Accepter, refuser ou planifier un entretien.</span>
+        </a>
+    </div>
+</section>

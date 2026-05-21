@@ -1,0 +1,26 @@
+<div class="toast-stack" aria-live="polite" aria-atomic="true">
+    @if (TempData["SuccessMessage"] is string successMessage)
+    {
+        <div class="toast-modern toast-success" data-toast>
+            <span class="toast-icon">✓</span>
+            <div class="toast-body">@successMessage</div>
+            <button type="button" class="toast-close" data-toast-close aria-label="Fermer">×</button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] is string errorMessage)
+    {
+        <div class="toast-modern toast-error" data-toast>
+            <span class="toast-icon">!</span>
+            <div class="toast-body">@errorMessage</div>
+            <button type="button" class="toast-close" data-toast-close aria-label="Fermer">×</button>
+        </div>
+    }
+    @if (TempData["InfoMessage"] is string infoMessage)
+    {
+        <div class="toast-modern toast-info" data-toast>
+            <span class="toast-icon">i</span>
+            <div class="toast-body">@infoMessage</div>
+            <button type="button" class="toast-close" data-toast-close aria-label="Fermer">×</button>
+        </div>
+    }
+</div>

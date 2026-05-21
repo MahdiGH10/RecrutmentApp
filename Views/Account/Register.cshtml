@@ -1,0 +1,130 @@
+@model RecruitApp.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Inscription";
+}
+
+<div class="auth-shell">
+    <div class="auth-layout auth-layout-register">
+        <aside class="auth-aside auth-aside-register">
+            <p class="eyebrow auth-eyebrow">Créer un compte</p>
+            <h1>D'abord, dites-nous qui vous êtes.</h1>
+            <p>
+                Un compte candidat démarre vite. Un compte recruteur demande aussi les informations de l'entreprise,
+                puis reste en attente jusqu'à validation par un admin.
+            </p>
+        </aside>
+
+        <div class="auth-card auth-card-wide">
+            <div class="auth-header">
+                <h2>Quel type de compte voulez-vous créer ?</h2>
+                <p>Les champs s'adaptent selon votre profil.</p>
+            </div>
+
+            <form asp-action="Register" method="post" class="auth-form">
+                <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+                <div>
+                    <label class="form-label">Votre profil</label>
+                    <div class="account-type-grid" data-account-type-grid>
+                        <label class="account-type-card @(Model.AccountType == RecruitApp.ViewModels.AccountType.Candidat ? "is-selected" : "")">
+                            <input asp-for="AccountType" type="radio" value="Candidat" />
+                            <span class="account-type-chip">Candidat</span>
+                            <strong>Je cherche un emploi</strong>
+                            <p>Inscription simple pour consulter les offres, postuler et suivre vos candidatures.</p>
+                        </label>
+
+                        <label class="account-type-card @(Model.AccountType == RecruitApp.ViewModels.AccountType.Recruteur ? "is-selected" : "")">
+                            <input asp-for="AccountType" type="radio" value="Recruteur" />
+                            <span class="account-type-chip">Recruteur</span>
+                            <strong>Je recrute pour une entreprise</strong>
+                            <p>Ajoutez les informations de votre entreprise pour validation par l'admin.</p>
+                        </label>
+                    </div>
+                    <span asp-validation-for="AccountType" class="text-danger small"></span>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="Prenom" class="form-label">Prénom</label>
+                        <input asp-for="Prenom" class="form-control form-control-lg" placeholder="Votre prénom" />
+                        <span asp-validation-for="Prenom" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Nom" class="form-label">Nom</label>
+                        <input asp-for="Nom" class="form-control form-control-lg" placeholder="Votre nom" />
+                        <span asp-validation-for="Nom" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="recruiter-fields" data-recruiter-fields>
+                    <div class="register-note">
+                        <strong>Informations entreprise</strong>
+                        <span>Ces informations aident l'admin à vérifier la demande recruteur avant confirmation.</span>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="CompanyName" class="form-label">Nom de l'entreprise</label>
+                            <input asp-for="CompanyName" class="form-control form-control-lg" placeholder="Ex: TechCorp Tunisie" />
+                            <span asp-validation-for="CompanyName" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="CompanyDomain" class="form-label">Domaine d'activité</label>
+                            <input asp-for="CompanyDomain" class="form-control form-control-lg" placeholder="Ex: IT, santé, finance..." />
+                            <span asp-validation-for="CompanyDomain" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="CompanyWebsite" class="form-label">Site web</label>
+                            <input asp-for="CompanyWebsite" class="form-control form-control-lg" placeholder="https://exemple.com" />
+                            <span asp-validation-for="CompanyWebsite" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="CompanyAddress" class="form-label">Adresse</label>
+                            <input asp-for="CompanyAddress" class="form-control form-control-lg" placeholder="Ville, adresse..." />
+                            <span asp-validation-for="CompanyAddress" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label asp-for="CompanyDescription" class="form-label">Description courte</label>
+                        <textarea asp-for="CompanyDescription" class="form-control" rows="3" placeholder="Présentez rapidement l'entreprise et ses recrutements."></textarea>
+                        <span asp-validation-for="CompanyDescription" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div>
+                    <label asp-for="Email" class="form-label">Email</label>
+                    <input asp-for="Email" class="form-control form-control-lg" placeholder="nom@exemple.com" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="Password" class="form-label">Mot de passe</label>
+                        <input asp-for="Password" type="password" class="form-control form-control-lg" placeholder="8 caractères minimum" />
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="ConfirmPassword" class="form-label">Confirmation</label>
+                        <input asp-for="ConfirmPassword" type="password" class="form-control form-control-lg" placeholder="Répétez le mot de passe" />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 mt-2">Créer mon compte</button>
+            </form>
+
+            <div class="auth-footer">
+                <span>Déjà inscrit ?</span>
+                <a asp-action="Login">Se connecter</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
