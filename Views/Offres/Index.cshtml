@@ -82,7 +82,21 @@
 
             <div class="offer-footer">
                 <small>Publié le @offre.PublieeAt.ToString("dd/MM/yyyy")</small>
-                <a asp-action="Detail" asp-route-id="@offre.Id" class="btn btn-secondary btn-sm">Voir l'offre</a>
+                @if (User.Identity?.IsAuthenticated ?? false)
+                {
+                    if (User.IsInRole("Candidat"))
+                    {
+                        <a asp-action="Detail" asp-route-id="@offre.Id" asp-fragment="formulaire-candidature" class="btn btn-primary btn-sm">Postuler</a>
+                    }
+                    else
+                    {
+                        <a asp-action="Detail" asp-route-id="@offre.Id" class="btn btn-secondary btn-sm">Voir l'offre</a>
+                    }
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-sm">Se connecter pour postuler</a>
+                }
             </div>
         </article>
     }

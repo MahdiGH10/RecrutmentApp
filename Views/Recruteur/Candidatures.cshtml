@@ -6,6 +6,22 @@
     var entretiens = candidatures.Count(c => c.Entretien is not null);
     var enAttente = candidatures.Count(c => c.Statut == RecruitApp.Models.Enums.StatutCandidature.EnAttente);
     var aPlanifier = candidatures.Count(c => c.Entretien is null);
+    var validatedOffers = candidatures
+        .Select(c => c.Offre)
+        .Where(o => o is not null)
+        .DistinctBy(o => o!.Id)
+        .OrderBy(o => o!.Titre)
+        .ToList();
+
+    string StatusLabel(RecruitApp.Models.Enums.StatutCandidature statut) => statut switch
+    {
+        RecruitApp.Models.Enums.StatutCandidature.EnAttente => "En attente",
+        RecruitApp.Models.Enums.StatutCandidature.Vue => "Vue",
+        RecruitApp.Models.Enums.StatutCandidature.Acceptee => "Acceptée",
+        RecruitApp.Models.Enums.StatutCandidature.Refusee => "Refusée",
+        RecruitApp.Models.Enums.StatutCandidature.EntretienPlanifie => "Entretien planifié",
+        _ => statut.ToString()
+    };
 
     string BadgeClass(RecruitApp.Models.Enums.StatutCandidature statut) => statut switch
     {
@@ -20,16 +36,81 @@
     <div>
         <p class="eyebrow">Espace recruteur</p>
         <h1>Candidatures reçues</h1>
-        <p class="hero-copy">Changez les statuts, planifiez les entretiens et suivez la confirmation des candidats.</p>
+        <p class="hero-copy">Triez rapidement les candidatures, planifiez les entretiens et suivez les refus avec leurs motifs.</p>
     </div>
 </section>
 
 <div class="dashboard-grid dashboard-grid-pro mb-4">
     <div class="stat-card stat-card-pro"><span>Total</span><strong>@total</strong><small>Candidatures reçues</small></div>
-    <div class="stat-card stat-card-pro"><span>En attente</span><strong>@enAttente</strong><small>À traiter</small></div>
-    <div class="stat-card stat-card-pro"><span>Entretiens</span><strong>@entretiens</strong><small>Planifiés</small></div>
-    <div class="stat-card stat-card-pro"><span>À planifier</span><strong>@aPlanifier</strong><small>Sans créneau fixé</small></div>
+    <div class="stat-card stat-card-pro"><span>À traiter</span><strong>@enAttente</strong><small>Réponses en attente</small></div>
+    <div class="stat-card stat-card-pro"><span>Entretiens</span><strong>@entretiens</strong><small>Planifiés ou en cours</small></div>
+    <div class="stat-card stat-card-pro"><span>À confirmer</span><strong>@aPlanifier</strong><small>À préparer pour l'entretien</small></div>
 </div>
+
+<section class="card-surface recruiter-filter-panel mb-4">
+    <div class="panel-header-line">
+        <div>
+            <p class="eyebrow">Filtrer</p>
+            <h2 class="panel-title">Retrouver une candidature en quelques secondes</h2>
+        </div>
+        <a asp-action="Candidatures" class="btn btn-secondary btn-sm">Réinitialiser</a>
+    </div>
+
+    <form method="get" class="recruiter-filter-grid">
+        <div>
+            <label class="form-label">Recherche</label>
+            <input name="search" value="@Model.Search" class="form-control" placeholder="Nom, email ou offre..." />
+        </div>
+
+        <div>
+            <label class="form-label">Statut</label>
+            <select name="statut" class="form-select">
+                <option value="">Tous</option>
+                @foreach (var statut in Enum.GetValues<RecruitApp.Models.Enums.StatutCandidature>())
+                {
+                    if (Model.Statut == statut)
+                    {
+                        <option value="@statut" selected>@StatusLabel(statut)</option>
+                    }
+                    else
+                    {
+                        <option value="@statut">@StatusLabel(statut)</option>
+                    }
+                }
+            </select>
+        </div>
+
+        <div>
+            <label class="form-label">Offre</label>
+            <select name="offreId" class="form-select">
+                <option value="">Toutes</option>
+                @foreach (var offre in validatedOffers)
+                {
+                    if (Model.OfferFilterId == offre!.Id)
+                    {
+                        <option value="@offre.Id" selected>@offre.Titre</option>
+                    }
+                    else
+                    {
+                        <option value="@offre.Id">@offre.Titre</option>
+                    }
+                }
+            </select>
+        </div>
+
+        <div class="recruiter-filter-toggle">
+            <label class="form-label">Entretiens</label>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" name="onlyInterviews" value="true" @(Model.OnlyInterviews ? "checked" : null) />
+                <label class="form-check-label">Seulement les dossiers avec entretien</label>
+            </div>
+        </div>
+
+        <div class="d-grid align-self-end">
+            <button type="submit" class="btn btn-primary">Appliquer</button>
+        </div>
+    </form>
+</section>
 
 <section class="card-surface recruiter-planning-banner">
     <div class="panel-header-line">
@@ -62,7 +143,7 @@
 {
     <div class="empty-state card-surface">
         <h3>Aucune candidature reçue pour le moment.</h3>
-        <p>Lorsque des candidats postulent à vos offres, elles apparaîtront ici.</p>
+        <p>Lorsque des candidats postulent à vos offres, elles apparaîtront ici avec les statuts et actions rapides.</p>
     </div>
 }
 else
@@ -70,23 +151,26 @@ else
     <div class="recruiter-application-list">
         @foreach (var item in candidatures)
         {
-            <article class="recruiter-application-card">
+            <article class="recruiter-application-card @(item.Statut == RecruitApp.Models.Enums.StatutCandidature.Refusee ? "is-refused" : item.Entretien is not null ? "has-interview" : "")">
                 <div class="candidate-summary">
                     <div class="candidate-avatar">@((item.Candidat?.Prenom ?? "C").Substring(0, 1).ToUpper())</div>
-                    <div>
-                        <h2>@item.Candidat?.Prenom @item.Candidat?.Nom</h2>
+                    <div class="candidate-summary-main">
+                        <div class="candidate-title-row">
+                            <h2>@item.Candidat?.Prenom @item.Candidat?.Nom</h2>
+                            <span class="badge @BadgeClass(item.Statut)">@StatusLabel(item.Statut)</span>
+                        </div>
                         <p>@item.Candidat?.Email</p>
-                        <span>@item.Offre?.Titre · postulée le @item.PostuleeAt.ToString("dd/MM/yyyy")</span>
+                        <span>@item.Offre?.Titre</span>
+                        <small>Postulée le @item.PostuleeAt.ToString("dd/MM/yyyy")</small>
                     </div>
                 </div>
 
                 <div class="candidate-status-panel">
-                    <span class="badge @BadgeClass(item.Statut)">@item.Statut</span>
                     @if (item.Entretien is not null)
                     {
                         <div class="interview-summary">
-                            <span class="badge @(item.Entretien.IsConfirmedByCandidat ? "badge-acceptee" : "badge-entretien")">
-                                @(item.Entretien.IsConfirmedByCandidat ? "Entretien confirmé" : "Confirmation attendue")
+                            <span class="badge @(item.Entretien.IsConfirmedByCandidat ? "badge-acceptee" : (!string.IsNullOrWhiteSpace(item.Entretien.DeclineReason) ? "badge-refusee" : "badge-entretien"))">
+                                @(item.Entretien.IsConfirmedByCandidat ? "Entretien confirmé" : (!string.IsNullOrWhiteSpace(item.Entretien.DeclineReason) ? "Entretien refusé" : "Confirmation attendue"))
                             </span>
                             <div class="interview-meta">
                                 <strong>@item.Entretien.DateHeure.ToString("dd/MM/yyyy HH:mm")</strong>
@@ -95,35 +179,64 @@ else
                                 {
                                     <p>@item.Entretien.Notes</p>
                                 }
+                                @if (!string.IsNullOrWhiteSpace(item.Entretien.DeclineReason))
+                                {
+                                    <p><strong>Motif du refus :</strong> @item.Entretien.DeclineReason</p>
+                                }
                             </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="interview-summary interview-summary-empty">
+                            <span class="badge badge-attente">Aucun entretien</span>
+                            <p>Vous pouvez planifier un rendez-vous après avoir choisi un statut adapté.</p>
                         </div>
                     }
                 </div>
 
                 <div class="candidate-actions-grid">
-                    <form asp-action="ChangerStatut" method="post" class="status-form">
-                        <input type="hidden" name="id" value="@item.Id" />
-                        <label class="form-label">Statut</label>
-                        <div class="inline-action">
-                            <select name="statut" class="form-select">
-                                @foreach (var statut in Enum.GetValues<RecruitApp.Models.Enums.StatutCandidature>())
-                                {
-                                    if (statut == item.Statut)
-                                    {
-                                        <option value="@statut" selected>@statut</option>
-                                    }
-                                    else
-                                    {
-                                        <option value="@statut">@statut</option>
-                                    }
-                                }
-                            </select>
-                            <button type="submit" class="btn btn-secondary">Mettre à jour</button>
-                        </div>
-                    </form>
+                    <div class="candidate-actions-header">
+                        <span class="section-chip">Actions rapides</span>
+                        <p>Mettre à jour le dossier sans quitter la page.</p>
+                    </div>
+
+                    <div class="quick-actions-grid">
+                        <form asp-action="ChangerStatut" method="post">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <input type="hidden" name="statut" value="Vue" />
+                            <input type="hidden" name="search" value="@Model.Search" />
+                            <input type="hidden" name="currentStatut" value="@(Model.Statut?.ToString() ?? string.Empty)" />
+                            <input type="hidden" name="offreId" value="@(Model.OfferFilterId?.ToString() ?? string.Empty)" />
+                            <input type="hidden" name="onlyInterviews" value="@Model.OnlyInterviews" />
+                            <button type="submit" class="btn btn-secondary btn-sm">Marquer vue</button>
+                        </form>
+                        <form asp-action="ChangerStatut" method="post">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <input type="hidden" name="statut" value="EntretienPlanifie" />
+                            <input type="hidden" name="search" value="@Model.Search" />
+                            <input type="hidden" name="currentStatut" value="@(Model.Statut?.ToString() ?? string.Empty)" />
+                            <input type="hidden" name="offreId" value="@(Model.OfferFilterId?.ToString() ?? string.Empty)" />
+                            <input type="hidden" name="onlyInterviews" value="@Model.OnlyInterviews" />
+                            <button type="submit" class="btn btn-primary btn-sm">Confirmer entretien</button>
+                        </form>
+                        <form asp-action="ChangerStatut" method="post">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <input type="hidden" name="statut" value="Refusee" />
+                            <input type="hidden" name="search" value="@Model.Search" />
+                            <input type="hidden" name="currentStatut" value="@(Model.Statut?.ToString() ?? string.Empty)" />
+                            <input type="hidden" name="offreId" value="@(Model.OfferFilterId?.ToString() ?? string.Empty)" />
+                            <input type="hidden" name="onlyInterviews" value="@Model.OnlyInterviews" />
+                            <button type="submit" class="btn btn-danger btn-sm">Refuser</button>
+                        </form>
+                    </div>
 
                     <form asp-action="PlanifierEntretien" method="post" class="schedule-form">
                         <input type="hidden" name="candidatureId" value="@item.Id" />
+                        <input type="hidden" name="search" value="@Model.Search" />
+                        <input type="hidden" name="currentStatut" value="@(Model.Statut?.ToString() ?? string.Empty)" />
+                        <input type="hidden" name="offreId" value="@(Model.OfferFilterId?.ToString() ?? string.Empty)" />
+                        <input type="hidden" name="onlyInterviews" value="@Model.OnlyInterviews" />
                         <label class="form-label">Planifier / replanifier un entretien</label>
                         <div class="schedule-grid">
                             <div>

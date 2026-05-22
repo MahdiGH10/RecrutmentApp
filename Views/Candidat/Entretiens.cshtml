@@ -3,7 +3,8 @@
     ViewData["Title"] = "Mes entretiens";
     var entretiens = Model.ToList();
     var total = entretiens.Count;
-    var aConfirmer = entretiens.Count(e => !e.IsConfirmedByCandidat);
+    var aConfirmer = entretiens.Count(e => !e.IsConfirmedByCandidat && string.IsNullOrWhiteSpace(e.DeclineReason));
+    var refuses = entretiens.Count(e => !string.IsNullOrWhiteSpace(e.DeclineReason));
 }
 
 <section class="page-hero dashboard-hero dashboard-hero-pro">
@@ -17,6 +18,7 @@
 <div class="dashboard-grid dashboard-grid-pro mb-4">
     <div class="stat-card stat-card-pro"><span>Entretiens</span><strong>@total</strong><small>Rendez-vous planifiés</small></div>
     <div class="stat-card stat-card-pro"><span>À confirmer</span><strong>@aConfirmer</strong><small>Action requise de votre part</small></div>
+    <div class="stat-card stat-card-pro"><span>Refusés</span><strong>@refuses</strong><small>Avec motif transmis</small></div>
 </div>
 
 @if (total == 0)
@@ -33,8 +35,8 @@ else
         {
             <article class="interview-card">
                 <div>
-                    <span class="badge @(entretien.IsConfirmedByCandidat ? "badge-acceptee" : "badge-attente")">
-                        @(entretien.IsConfirmedByCandidat ? "Confirmé" : "À confirmer")
+                    <span class="badge @(entretien.IsConfirmedByCandidat ? "badge-acceptee" : (!string.IsNullOrWhiteSpace(entretien.DeclineReason) ? "badge-refusee" : "badge-attente"))">
+                        @(entretien.IsConfirmedByCandidat ? "Confirmé" : (!string.IsNullOrWhiteSpace(entretien.DeclineReason) ? "Refusé" : "À confirmer"))
                     </span>
                     <h2>@entretien.Candidature?.Offre?.Titre</h2>
                     <p>@entretien.DateHeure.ToString("dd/MM/yyyy HH:mm") · @entretien.Lieu</p>
@@ -42,15 +44,29 @@ else
                     {
                         <p class="interview-note">@entretien.Notes</p>
                     }
+                    @if (!string.IsNullOrWhiteSpace(entretien.DeclineReason))
+                    {
+                        <p class="interview-note interview-decline-note"><strong>Motif du refus :</strong> @entretien.DeclineReason</p>
+                    }
                 </div>
 
                 @if (!entretien.IsConfirmedByCandidat)
                 {
-                    <form asp-action="ConfirmerEntretien" method="post" class="interview-actions">
-                        <input type="hidden" name="entretienId" value="@entretien.Id" />
-                        <button type="submit" name="confirmed" value="true" class="btn btn-primary">Confirmer</button>
-                        <button type="submit" name="confirmed" value="false" class="btn btn-secondary">Pas disponible</button>
-                    </form>
+                    <div class="interview-actions">
+                        <form asp-action="ConfirmerEntretien" method="post">
+                            <input type="hidden" name="entretienId" value="@entretien.Id" />
+                            <input type="hidden" name="confirmed" value="true" />
+                            <button type="submit" class="btn btn-primary">Confirmer</button>
+                        </form>
+
+                        <form asp-action="ConfirmerEntretien" method="post" class="decline-form">
+                            <input type="hidden" name="entretienId" value="@entretien.Id" />
+                            <input type="hidden" name="confirmed" value="false" />
+                            <label class="form-label">Motif du refus</label>
+                            <textarea name="declineReason" rows="3" class="form-control" placeholder="Expliquez brièvement pourquoi vous ne pouvez pas venir..." required></textarea>
+                            <button type="submit" class="btn btn-secondary mt-2">Pas disponible</button>
+                        </form>
+                    </div>
                 }
             </article>
         }

@@ -6,6 +6,21 @@
     var recentCandidates = Model.Candidats.OrderByDescending(c => c.CreatedAt).Take(5).ToList();
     var pendingCount = Model.Recruteurs.Count(r => !r.IsValidated);
     var validatedCount = Model.Recruteurs.Count(r => r.IsValidated);
+    var statusItems = new[]
+    {
+        new { Label = "En attente", Value = Model.CandidaturesEnAttente, Css = "chart-fill" },
+        new { Label = "Vues", Value = Model.CandidaturesVues, Css = "chart-fill chart-fill-secondary" },
+        new { Label = "Entretiens", Value = Model.CandidaturesEntretiensPlanifies, Css = "chart-fill chart-fill-info" },
+        new { Label = "Acceptées", Value = Model.CandidaturesAcceptees, Css = "chart-fill chart-fill-success" },
+        new { Label = "Refusées", Value = Model.CandidaturesRefusees, Css = "chart-fill chart-fill-danger" }
+    };
+    var recruiterItems = new[]
+    {
+        new { Label = "Validés", Value = Model.RecruteursValides, Css = "chart-fill chart-fill-success" },
+        new { Label = "En attente", Value = Model.RecruteursEnAttente, Css = "chart-fill chart-fill-warning" }
+    };
+    var statusTotal = Math.Max(statusItems.Sum(item => item.Value), 1);
+    var recruiterTotal = Math.Max(Model.TotalRecruteurs, 1);
 }
 
 <section class="page-hero dashboard-hero dashboard-hero-pro">
@@ -21,10 +36,12 @@
 
 <div class="dashboard-grid dashboard-grid-pro mb-4">
     <div class="stat-card stat-card-pro"><span>Offres actives</span><strong>@Model.TotalOffres</strong><small>Annonces visibles</small></div>
+    <div class="stat-card stat-card-pro"><span>Offres publiées</span><strong>@Model.TotalOffresPubliees</strong><small>Toutes les annonces</small></div>
     <div class="stat-card stat-card-pro"><span>Candidatures</span><strong>@Model.TotalCandidatures</strong><small>Dossiers reçus</small></div>
     <div class="stat-card stat-card-pro"><span>Entretiens</span><strong>@Model.TotalEntretiens</strong><small>Rendez-vous planifiés</small></div>
     <div class="stat-card stat-card-pro"><span>Recruteurs</span><strong>@Model.TotalRecruteurs</strong><small>Comptes entreprise</small></div>
     <div class="stat-card stat-card-pro"><span>Candidats</span><strong>@Model.TotalCandidats</strong><small>Profils inscrits</small></div>
+    <div class="stat-card stat-card-pro"><span>Recruteurs validés</span><strong>@Model.RecruteursValides</strong><small>Comptes prêts à publier</small></div>
 </div>
 
 <div class="admin-detail-grid">
@@ -82,6 +99,58 @@
         </div>
     </section>
 </div>
+
+<section class="admin-charts-grid mb-4">
+    <article class="card-surface admin-chart-card">
+        <div class="panel-header-line">
+            <div>
+                <p class="eyebrow">Candidatures</p>
+                <h2 class="panel-title">Répartition par statut</h2>
+            </div>
+        </div>
+
+        <div class="chart-list">
+            @foreach (var item in statusItems)
+            {
+                <div class="chart-row">
+                    <div class="chart-row-head">
+                        <span>@item.Label</span>
+                        <strong>@item.Value</strong>
+                    </div>
+                    <div class="chart-track">
+                        <div class="@item.Css" style="width:@(Math.Round(item.Value * 100.0 / statusTotal))%"></div>
+                    </div>
+                </div>
+            }
+        </div>
+    </article>
+
+    <article class="card-surface admin-chart-card">
+        <div class="panel-header-line">
+            <div>
+                <p class="eyebrow">Recruteurs</p>
+                <h2 class="panel-title">Validation des comptes</h2>
+            </div>
+        </div>
+
+        <div class="chart-list">
+            @foreach (var item in recruiterItems)
+            {
+                <div class="chart-row">
+                    <div class="chart-row-head">
+                        <span>@item.Label</span>
+                        <strong>@item.Value</strong>
+                    </div>
+                    <div class="chart-track">
+                        <div class="@item.Css" style="width:@(Math.Round(item.Value * 100.0 / recruiterTotal))%"></div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <p class="chart-foot">@Model.TotalOffres offres actives sur @Model.TotalOffresPubliees publications.</p>
+    </article>
+</section>
 
 <section class="dashboard-panel card-surface">
     <div class="panel-header-line">

@@ -8,6 +8,9 @@ using RecruitApp.ViewModels;
 namespace RecruitApp.Controllers;
 
 [Authorize(Roles = "Candidat")]
+/// <summary>
+/// Controller for candidate area: candidatures, entretiens and document management.
+/// </summary>
 public class CandidatController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
@@ -24,6 +27,10 @@ public class CandidatController : Controller
         _environment = environment;
     }
 
+    /// <summary>
+    /// GET: /Candidat/Candidatures
+    /// Shows the current user's candidatures.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Candidatures()
     {
@@ -38,6 +45,10 @@ public class CandidatController : Controller
         return View(new CandidatureViewModel { Candidatures = candidatures });
     }
 
+    /// <summary>
+    /// GET: /Candidat/Entretiens
+    /// Lists interviews for the authenticated candidate.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Entretiens()
     {
@@ -51,6 +62,10 @@ public class CandidatController : Controller
         return View(entretiens);
     }
 
+    /// <summary>
+    /// GET: /Candidat/Documents
+    /// Shows uploaded documents for the candidate.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Documents()
     {
@@ -65,6 +80,10 @@ public class CandidatController : Controller
         return View(documents);
     }
 
+    /// <summary>
+    /// POST: /Candidat/UploadDocument
+    /// Upload a new document for the authenticated candidate.
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UploadDocument(DocumentUploadViewModel model)
@@ -108,6 +127,10 @@ public class CandidatController : Controller
         return RedirectToAction(nameof(Documents));
     }
 
+    /// <summary>
+    /// POST: /Candidat/DeleteDocument
+    /// Deletes a previously uploaded document (owner only).
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteDocument(int id)
@@ -137,9 +160,13 @@ public class CandidatController : Controller
         return RedirectToAction(nameof(Documents));
     }
 
+    /// <summary>
+    /// POST: /Candidat/ConfirmerEntretien
+    /// Candidate confirms or refuses an interview (refuse requires a reason).
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> ConfirmerEntretien(int entretienId, bool confirmed = true)
+    public async Task<IActionResult> ConfirmerEntretien(int entretienId, bool confirmed = true, string? declineReason = null)
     {
         var user = await _userManager.GetUserAsync(User);
         if (user is null)
@@ -147,8 +174,14 @@ public class CandidatController : Controller
             return Challenge();
         }
 
-        await _candidatureService.ConfirmInterviewAsync(entretienId, user.Id, confirmed);
-        TempData["SuccessMessage"] = confirmed ? "Entretien confirmé." : "Réponse enregistrée.";
+        if (!confirmed && string.IsNullOrWhiteSpace(declineReason))
+        {
+            TempData["ErrorMessage"] = "Merci d'ajouter un motif si vous refusez l'entretien.";
+            return RedirectToAction(nameof(Entretiens));
+        }
+
+        await _candidatureService.ConfirmInterviewAsync(entretienId, user.Id, confirmed, declineReason);
+        TempData["SuccessMessage"] = confirmed ? "Entretien confirmé." : "Refus enregistré avec votre motif.";
         return RedirectToAction(nameof(Entretiens));
     }
 }

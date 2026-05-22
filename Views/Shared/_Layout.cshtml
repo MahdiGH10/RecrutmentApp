@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<RecruitApp.Models.ApplicationUser> UserManager
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="utf-8" />
@@ -17,10 +19,14 @@
             </div>
 
             <nav class="top-actions">
-                <a class="top-link" asp-controller="Offres" asp-action="Index">Offres</a>
                 @if (User.Identity?.IsAuthenticated ?? false)
                 {
-                    <span class="role-pill">@User.Identity?.Name</span>
+                    var currentUser = await UserManager.GetUserAsync(User);
+                    var displayName = currentUser is null
+                        ? (User.Identity?.Name ?? "Utilisateur")
+                        : $"{currentUser.Prenom} {currentUser.Nom}".Trim();
+
+                    <span class="role-pill">@displayName</span>
                     <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
                         <button type="submit" class="btn btn-ghost">Déconnexion</button>
                     </form>

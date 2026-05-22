@@ -7,6 +7,9 @@ using RecruitApp.ViewModels;
 namespace RecruitApp.Controllers;
 
 [AllowAnonymous]
+/// <summary>
+/// Account controller handling authentication and registration.
+/// </summary>
 public class AccountController : Controller
 {
     private readonly SignInManager<ApplicationUser> _signInManager;
@@ -23,9 +26,17 @@ public class AccountController : Controller
         _roleManager = roleManager;
     }
 
+    /// <summary>
+    /// GET: /Account/Login
+    /// Shows the login page.
+    /// </summary>
     [HttpGet]
     public IActionResult Login() => View(new LoginViewModel());
 
+    /// <summary>
+    /// POST: /Account/Login
+    /// Handles user login submission.
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Login(LoginViewModel model)
@@ -60,9 +71,17 @@ public class AccountController : Controller
         return View(model);
     }
 
+    /// <summary>
+    /// GET: /Account/Register
+    /// Shows the registration page for the chosen account type.
+    /// </summary>
     [HttpGet]
     public IActionResult Register(AccountType type = AccountType.Candidat) => View(new RegisterViewModel { AccountType = type });
 
+    /// <summary>
+    /// POST: /Account/Register
+    /// Handles user registration and role assignment.
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Register(RegisterViewModel model)
@@ -117,6 +136,10 @@ public class AccountController : Controller
         return RedirectToAction(nameof(Login));
     }
 
+    /// <summary>
+    /// POST: /Account/Logout
+    /// Signs the current user out.
+    /// </summary>
     [HttpPost]
     [Authorize]
     [ValidateAntiForgeryToken]

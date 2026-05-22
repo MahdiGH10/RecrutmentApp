@@ -104,8 +104,12 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label asp-for="Password" class="form-label">Mot de passe</label>
-                        <input asp-for="Password" type="password" class="form-control form-control-lg" placeholder="8 caractères minimum" />
+                        <input asp-for="Password" type="password" class="form-control form-control-lg" placeholder="8 caractères minimum" autocomplete="new-password" data-password-strength-input />
                         <span asp-validation-for="Password" class="text-danger small"></span>
+                        <div class="password-meter" data-password-strength>
+                            <div class="password-meter-bar"><span class="password-meter-fill" data-password-strength-fill></span></div>
+                            <small class="password-meter-text" data-password-strength-text>Le mot de passe doit contenir des lettres, des chiffres et des symboles.</small>
+                        </div>
                     </div>
                     <div class="col-md-6">
                         <label asp-for="ConfirmPassword" class="form-label">Confirmation</label>

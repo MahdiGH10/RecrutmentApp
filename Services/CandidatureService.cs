@@ -5,6 +5,7 @@ using RecruitApp.Models.Enums;
 
 namespace RecruitApp.Services;
 
+// Candidature service
 public class CandidatureService : ICandidatureService
 {
     private readonly AppDbContext _context;
@@ -116,6 +117,17 @@ public class CandidatureService : ICandidatureService
         return _context.Entretiens.CountAsync();
     }
 
+    public Task<List<Candidature>> GetAllAsync()
+    {
+        return _context.Candidatures
+            .AsNoTracking()
+            .Include(c => c.Offre)
+            .Include(c => c.Candidat)
+            .Include(c => c.Entretien)
+            .OrderByDescending(c => c.PostuleeAt)
+            .ToListAsync();
+    }
+
     public async Task AddAsync(Candidature candidature)
     {
         _context.Candidatures.Add(candidature);
@@ -166,7 +178,8 @@ public class CandidatureService : ICandidatureService
                 Lieu = lieu,
                 Notes = notes,
                 CandidatureId = candidature.Id,
-                IsConfirmedByCandidat = false
+                IsConfirmedByCandidat = false,
+                DeclineReason = null
             };
             _context.Entretiens.Add(candidature.Entretien);
         }
@@ -176,6 +189,7 @@ public class CandidatureService : ICandidatureService
             candidature.Entretien.Lieu = lieu;
             candidature.Entretien.Notes = notes;
             candidature.Entretien.IsConfirmedByCandidat = false;
+            candidature.Entretien.DeclineReason = null;
         }
 
         candidature.Statut = StatutCandidature.EntretienPlanifie;
@@ -183,7 +197,7 @@ public class CandidatureService : ICandidatureService
         await _context.SaveChangesAsync();
     }
 
-    public async Task ConfirmInterviewAsync(int entretienId, string candidateId, bool confirmed)
+    public async Task ConfirmInterviewAsync(int entretienId, string candidateId, bool confirmed, string? declineReason = null)
     {
         var entretien = await _context.Entretiens
             .Include(e => e.Candidature)
@@ -195,6 +209,14 @@ public class CandidatureService : ICandidatureService
         }
 
         entretien.IsConfirmedByCandidat = confirmed;
+        entretien.DeclineReason = confirmed ? null : declineReason?.Trim();
+
+        if (!confirmed && entretien.Candidature is not null)
+        {
+            entretien.Candidature.Statut = StatutCandidature.Refusee;
+            entretien.Candidature.IsSeenByCandidat = false;
+        }
+
         await _context.SaveChangesAsync();
     }
 

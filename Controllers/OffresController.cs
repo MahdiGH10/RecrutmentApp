@@ -6,6 +6,9 @@ using RecruitApp.ViewModels;
 
 namespace RecruitApp.Controllers;
 
+/// <summary>
+/// Controller responsible for public and candidate-facing offers pages.
+/// </summary>
 public class OffresController : Controller
 {
     private readonly IOffreService _offreService;
@@ -22,6 +25,10 @@ public class OffresController : Controller
         _userManager = userManager;
     }
 
+    /// <summary>
+    /// GET: /Offres
+    /// Lists public offers with optional filters (search, zone, type).
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Index(string? search, string? zone, RecruitApp.Models.Enums.TypeOffre? type)
     {
@@ -35,6 +42,10 @@ public class OffresController : Controller
         });
     }
 
+    /// <summary>
+    /// GET: /Offres/Detail/{id}
+    /// Shows details for a single offer. If the user is a candidate, includes application state.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Detail(int id)
     {
@@ -70,6 +81,10 @@ public class OffresController : Controller
         });
     }
 
+    /// <summary>
+    /// POST: /Offres/Postuler/{id}
+    /// Candidate action to submit an application to an offer.
+    /// </summary>
     [HttpPost]
     [Authorize(Roles = "Candidat")]
     [ValidateAntiForgeryToken]

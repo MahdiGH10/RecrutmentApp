@@ -8,6 +8,9 @@ using RecruitApp.ViewModels;
 namespace RecruitApp.Controllers;
 
 [Authorize(Roles = "Admin")]
+/// <summary>
+/// Administration area for managing users, recruiters and global KPIs.
+/// </summary>
 public class AdminController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
@@ -24,19 +27,46 @@ public class AdminController : Controller
         _candidatureService = candidatureService;
     }
 
+    /// <summary>
+    /// GET: /Admin/Dashboard
+    /// Shows administrative dashboard with KPIs.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Dashboard()
     {
         var recruteurs = await _userManager.GetUsersInRoleAsync("Recruteur");
         var candidats = await _userManager.GetUsersInRoleAsync("Candidat");
+        var candidatures = await _candidatureService.GetAllAsync();
+
+        var candidatureStats = candidatures
+            .GroupBy(c => c.Statut)
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        candidatureStats.TryGetValue(RecruitApp.Models.Enums.StatutCandidature.EnAttente, out var enAttente);
+        candidatureStats.TryGetValue(RecruitApp.Models.Enums.StatutCandidature.Vue, out var vues);
+        candidatureStats.TryGetValue(RecruitApp.Models.Enums.StatutCandidature.Acceptee, out var acceptees);
+        candidatureStats.TryGetValue(RecruitApp.Models.Enums.StatutCandidature.Refusee, out var refusees);
+        candidatureStats.TryGetValue(RecruitApp.Models.Enums.StatutCandidature.EntretienPlanifie, out var entretiensPlanifies);
+
+        var totalOffresPubliees = await _offreService.CountAllAsync();
+        var totalOffresActives = await _offreService.CountActiveAsync();
 
         var model = new AdminDashboardViewModel
         {
-            TotalOffres = await _offreService.CountActiveAsync(),
+            TotalOffres = totalOffresActives,
+            TotalOffresPubliees = totalOffresPubliees,
+            TotalOffresInactives = Math.Max(totalOffresPubliees - totalOffresActives, 0),
             TotalCandidatures = await _candidatureService.CountAllAsync(),
             TotalEntretiens = await _candidatureService.CountEntretiensAsync(),
             TotalRecruteurs = recruteurs.Count,
+            RecruteursValides = recruteurs.Count(r => r.IsValidated),
+            RecruteursEnAttente = recruteurs.Count(r => !r.IsValidated),
             TotalCandidats = candidats.Count,
+            CandidaturesEnAttente = enAttente,
+            CandidaturesVues = vues,
+            CandidaturesAcceptees = acceptees,
+            CandidaturesRefusees = refusees,
+            CandidaturesEntretiensPlanifies = entretiensPlanifies,
             Recruteurs = recruteurs,
             Candidats = candidats
         };
@@ -44,6 +74,10 @@ public class AdminController : Controller
         return View(model);
     }
 
+    /// <summary>
+    /// GET: /Admin/Recruteurs
+    /// Lists recruiter accounts for validation and management.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Recruteurs()
     {
@@ -51,6 +85,10 @@ public class AdminController : Controller
         return View(recruteurs);
     }
 
+    /// <summary>
+    /// GET: /Admin/RecruteurDetails/{id}
+    /// Shows details for a recruiter account.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> RecruteurDetails(string id)
     {
@@ -63,6 +101,10 @@ public class AdminController : Controller
         return View(user);
     }
 
+    /// <summary>
+    /// POST: /Admin/Valider
+    /// Validates a recruiter account.
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Valider(string id)

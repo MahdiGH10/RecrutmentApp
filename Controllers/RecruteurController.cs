@@ -9,6 +9,9 @@ using RecruitApp.ViewModels;
 namespace RecruitApp.Controllers;
 
 [Authorize(Roles = "Recruteur")]
+/// <summary>
+/// Controller for recruiter actions: manage offers and review candidatures.
+/// </summary>
 public class RecruteurController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
@@ -25,6 +28,10 @@ public class RecruteurController : Controller
         _candidatureService = candidatureService;
     }
 
+    /// <summary>
+    /// GET: /Recruteur/Dashboard
+    /// Recruiter dashboard overview.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Dashboard()
     {
@@ -40,6 +47,10 @@ public class RecruteurController : Controller
         return View();
     }
 
+    /// <summary>
+    /// GET: /Recruteur/MesOffres
+    /// Lists the authenticated recruiter's offers.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> MesOffres()
     {
@@ -53,12 +64,20 @@ public class RecruteurController : Controller
         return View(new OffreListViewModel { Offres = offres });
     }
 
+    /// <summary>
+    /// GET: /Recruteur/Create
+    /// Show form to create a new offer.
+    /// </summary>
     [HttpGet]
     public IActionResult Create()
     {
         return View(new OffreFormViewModel());
     }
 
+    /// <summary>
+    /// POST: /Recruteur/Create
+    /// Persist a new offer for the authenticated recruiter.
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(OffreFormViewModel model)
@@ -93,6 +112,10 @@ public class RecruteurController : Controller
         return RedirectToAction(nameof(MesOffres));
     }
 
+    /// <summary>
+    /// GET: /Recruteur/Edit/{id}
+    /// Show form to edit an existing offer (owner only).
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Edit(int id)
     {
@@ -123,6 +146,10 @@ public class RecruteurController : Controller
         });
     }
 
+    /// <summary>
+    /// POST: /Recruteur/Edit
+    /// Save changes to an offer (owner only).
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(OffreFormViewModel model)
@@ -160,6 +187,10 @@ public class RecruteurController : Controller
         return RedirectToAction(nameof(MesOffres));
     }
 
+    /// <summary>
+    /// POST: /Recruteur/Delete
+    /// Delete an offer owned by the recruiter.
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id)
@@ -181,8 +212,12 @@ public class RecruteurController : Controller
         return RedirectToAction(nameof(MesOffres));
     }
 
+    /// <summary>
+    /// GET: /Recruteur/Candidatures
+    /// Lists candidatures for the authenticated recruiter with filters.
+    /// </summary>
     [HttpGet]
-    public async Task<IActionResult> Candidatures()
+    public async Task<IActionResult> Candidatures(string? search, StatutCandidature? statut, int? offreId, bool onlyInterviews = false)
     {
         var user = await _userManager.GetUserAsync(User);
         if (user is null)
@@ -191,24 +226,69 @@ public class RecruteurController : Controller
         }
 
         var candidatures = await _candidatureService.GetByRecruiterAsync(user.Id);
-        return View(new CandidatureViewModel { Candidatures = candidatures });
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim();
+            candidatures = candidatures.Where(c =>
+                (c.Candidat?.Prenom?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (c.Candidat?.Nom?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (c.Candidat?.Email?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (c.Offre?.Titre?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false)).ToList();
+        }
+
+        if (statut.HasValue)
+        {
+            candidatures = candidatures.Where(c => c.Statut == statut.Value).ToList();
+        }
+
+        if (offreId.HasValue)
+        {
+            candidatures = candidatures.Where(c => c.OffreId == offreId.Value).ToList();
+        }
+
+        if (onlyInterviews)
+        {
+            candidatures = candidatures.Where(c => c.Entretien is not null).ToList();
+        }
+
+        candidatures = candidatures
+            .Where(c => c.Statut != StatutCandidature.Refusee && string.IsNullOrWhiteSpace(c.Entretien?.DeclineReason))
+            .ToList();
+
+        return View(new CandidatureViewModel
+        {
+            Candidatures = candidatures,
+            Search = search,
+            Statut = statut,
+            OfferFilterId = offreId,
+            OnlyInterviews = onlyInterviews
+        });
     }
 
+    /// <summary>
+    /// POST: /Recruteur/ChangerStatut
+    /// Change the status of a candidature.
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> ChangerStatut(int id, StatutCandidature statut)
+    public async Task<IActionResult> ChangerStatut(int id, StatutCandidature statut, string? search = null, StatutCandidature? currentStatut = null, int? offreId = null, bool onlyInterviews = false)
     {
         await _candidatureService.UpdateStatusAsync(id, statut);
         TempData["SuccessMessage"] = "Statut mis à jour.";
-        return RedirectToAction(nameof(Candidatures));
+        return RedirectToAction(nameof(Candidatures), new { search, statut = currentStatut, offreId, onlyInterviews });
     }
 
+    /// <summary>
+    /// POST: /Recruteur/PlanifierEntretien
+    /// Schedule an interview for a candidature.
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> PlanifierEntretien(int candidatureId, DateTime dateHeure, string lieu, string? notes)
+    public async Task<IActionResult> PlanifierEntretien(int candidatureId, DateTime dateHeure, string lieu, string? notes, string? search = null, StatutCandidature? currentStatut = null, int? offreId = null, bool onlyInterviews = false)
     {
         await _candidatureService.ScheduleInterviewAsync(candidatureId, dateHeure, lieu, notes);
         TempData["SuccessMessage"] = "Entretien planifié.";
-        return RedirectToAction(nameof(Candidatures));
+        return RedirectToAction(nameof(Candidatures), new { search, statut = currentStatut, offreId, onlyInterviews });
     }
 }

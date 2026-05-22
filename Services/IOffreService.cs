@@ -3,6 +3,7 @@ using RecruitApp.Models.Enums;
 
 namespace RecruitApp.Services;
 
+// Offre service
 public interface IOffreService
 {
     Task<List<Offre>> GetPublicOffersAsync(string? search = null, string? zone = null, TypeOffre? type = null);
@@ -12,6 +13,8 @@ public interface IOffreService
     Task<Offre?> GetByIdAndRecruiterAsync(int id, string recruiterId);
 
     Task<List<Offre>> GetByRecruiterAsync(string recruiterId);
+
+    Task<int> CountAllAsync();
 
     Task<int> CountActiveAsync();
 

@@ -1,6 +1,8 @@
 using RecruitApp.Models.Enums;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace RecruitApp.Models;
+
 
 public class Offre
 {
@@ -28,7 +30,9 @@ public class Offre
 
     public string RecruteurId { get; set; } = string.Empty;
 
+ 
     public ApplicationUser? Recruteur { get; set; }
+
 
     public ICollection<Candidature> Candidatures { get; set; } = new List<Candidature>();
 }

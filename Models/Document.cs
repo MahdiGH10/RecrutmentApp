@@ -1,4 +1,7 @@
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+
 namespace RecruitApp.Models;
+
 
 public class Document
 {
@@ -14,5 +17,6 @@ public class Document
 
     public string UserId { get; set; } = string.Empty;
 
+    
     public ApplicationUser? User { get; set; }
 }

@@ -3,6 +3,7 @@ using RecruitApp.Models.Enums;
 
 namespace RecruitApp.Services;
 
+// Candidature service
 public interface ICandidatureService
 {
     Task<List<Candidature>> GetByCandidateAsync(string candidateId);
@@ -31,6 +32,8 @@ public interface ICandidatureService
 
     Task<int> CountEntretiensAsync();
 
+    Task<List<Candidature>> GetAllAsync();
+
     Task AddAsync(Candidature candidature);
 
     Task AddDocumentAsync(Document document);
@@ -41,7 +44,7 @@ public interface ICandidatureService
 
     Task ScheduleInterviewAsync(int candidatureId, DateTime dateHeure, string lieu, string? notes);
 
-    Task ConfirmInterviewAsync(int entretienId, string candidateId, bool confirmed);
+    Task ConfirmInterviewAsync(int entretienId, string candidateId, bool confirmed, string? declineReason = null);
 
     Task MarkCandidateNotificationsSeenAsync(string candidateId);
 }

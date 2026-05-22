@@ -5,6 +5,7 @@ using RecruitApp.Models.Enums;
 
 namespace RecruitApp.Services;
 
+// Offre service
 public class OffreService : IOffreService
 {
     private readonly AppDbContext _context;
@@ -62,6 +63,11 @@ public class OffreService : IOffreService
             .Where(o => o.RecruteurId == recruiterId)
             .OrderByDescending(o => o.PublieeAt)
             .ToListAsync();
+    }
+
+    public Task<int> CountAllAsync()
+    {
+        return _context.Offres.CountAsync();
     }
 
     public Task<int> CountActiveAsync()

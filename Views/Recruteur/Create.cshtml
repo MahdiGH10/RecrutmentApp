@@ -1,6 +1,7 @@
 @model RecruitApp.ViewModels.OffreFormViewModel
 @{
     ViewData["Title"] = "Nouvelle offre";
+    var minExpiration = DateTime.Now.ToString("yyyy-MM-ddTHH:mm");
 }
 
 <section class="page-hero dashboard-hero">
@@ -63,8 +64,9 @@
         <div class="row g-3 mt-1">
             <div class="col-md-6">
                 <label asp-for="ExpiresAt" class="form-label"></label>
-                <input asp-for="ExpiresAt" type="datetime-local" class="form-control" />
+                <input asp-for="ExpiresAt" type="datetime-local" class="form-control" min="@minExpiration" />
                 <span asp-validation-for="ExpiresAt" class="text-danger small"></span>
+                <small class="text-muted d-block mt-1">La date d'expiration doit être dans le futur, sinon l’offre restera cachée.</small>
             </div>
             <div class="col-md-6 d-flex align-items-end">
                 <div class="form-check form-switch">

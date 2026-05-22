@@ -91,6 +91,11 @@ else
                         </div>
                     </div>
 
+                    @if (!Model.InterviewConfirmed.GetValueOrDefault() && Model.ApplicationStatus == RecruitApp.Models.Enums.StatutCandidature.Refusee)
+                    {
+                        <p class="application-note mb-0"><strong>Motif du refus :</strong> consultable dans votre espace entretiens.</p>
+                    }
+
                     <p class="application-note">
                         Vous pouvez suivre l’évolution depuis <a asp-controller="Candidat" asp-action="Candidatures">mes candidatures</a>.
                     </p>
@@ -98,7 +103,7 @@ else
             }
             else if (Model.IsCandidate)
             {
-                <form asp-action="Postuler" asp-route-id="@Model.Offre.Id" method="post" class="apply-form">
+                <form id="formulaire-candidature" asp-action="Postuler" asp-route-id="@Model.Offre.Id" method="post" class="apply-form">
                     <input type="hidden" name="OffreId" value="@Model.Offre.Id" />
                     <div class="row g-3">
                         <div class="col-12">

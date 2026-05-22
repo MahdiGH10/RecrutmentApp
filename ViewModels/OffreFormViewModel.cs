@@ -4,6 +4,7 @@ using RecruitApp.Models.Enums;
 namespace RecruitApp.ViewModels;
 
 public class OffreFormViewModel
+    : IValidatableObject
 {
     public int Id { get; set; }
 
@@ -34,4 +35,14 @@ public class OffreFormViewModel
     public bool IsActive { get; set; } = true;
 
     public DateTime? ExpiresAt { get; set; }
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (ExpiresAt.HasValue && ExpiresAt.Value < DateTime.Now)
+        {
+            yield return new ValidationResult(
+                "La date d'expiration ne peut pas être dans le passé.",
+                new[] { nameof(ExpiresAt) });
+        }
+    }
 }
