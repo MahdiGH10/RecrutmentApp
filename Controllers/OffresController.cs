@@ -33,6 +33,21 @@ public class OffresController : Controller
     public async Task<IActionResult> Index(string? search, string? zone, RecruitApp.Models.Enums.TypeOffre? type)
     {
         var offres = await _offreService.GetPublicOffersAsync(search, zone, type);
+        // If the user is an authenticated candidate, compute which offers they already applied to
+        var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+        var appliedIds = new HashSet<int>();
+        if (isAuthenticated && User.IsInRole("Candidat"))
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser is not null)
+            {
+                var candidatures = await _candidatureService.GetByCandidateAsync(currentUser.Id);
+                appliedIds = candidatures.Where(c => c.OffreId != 0).Select(c => c.OffreId).ToHashSet();
+            }
+        }
+
+        ViewBag.AppliedOfferIds = appliedIds;
+
         return View(new OffreListViewModel
         {
             Offres = offres,

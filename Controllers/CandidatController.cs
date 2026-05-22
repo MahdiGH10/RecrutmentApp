@@ -96,7 +96,21 @@ public class CandidatController : Controller
 
         if (!ModelState.IsValid || model.File is null || model.File.Length == 0)
         {
-            TempData["ErrorMessage"] = "Veuillez sélectionner un fichier valide.";
+            // Build a clearer error message for debugging and user feedback
+            if (!ModelState.IsValid)
+            {
+                var errors = string.Join("; ", ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage));
+                TempData["ErrorMessage"] = string.IsNullOrWhiteSpace(errors)
+                    ? "Veuillez sélectionner un fichier valide." 
+                    : $"Erreur: {errors}";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Veuillez sélectionner un fichier valide.";
+            }
+
             return RedirectToAction(nameof(Documents));
         }
 

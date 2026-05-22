@@ -65,12 +65,17 @@
                 <div class="offer-company-block">
                     <span class="card-logo">@((offre.Recruteur?.Nom ?? "RA").Substring(0, 1).ToUpper())</span>
                     <div>
-                        <div class="offer-company">@offre.Recruteur?.Nom @offre.Recruteur?.Prenom</div>
+                        <div class="offer-company">@(offre.Recruteur?.CompanyName ?? (offre.Recruteur is null ? "RA" : string.Concat(offre.Recruteur?.Nom, " ", offre.Recruteur?.Prenom).Trim()))</div>
                         <h2 class="offer-title">@offre.Titre</h2>
                     </div>
                 </div>
                 <span class="badge badge-actif">@offre.Type</span>
             </div>
+
+            @{
+                var appliedIds = ViewBag.AppliedOfferIds as System.Collections.Generic.HashSet<int> ?? new System.Collections.Generic.HashSet<int>();
+                var hasApplied = appliedIds.Contains(offre.Id);
+            }
 
             <p class="offer-description">@offre.Description</p>
 
@@ -82,6 +87,13 @@
 
             <div class="offer-footer">
                 <small>Publié le @offre.PublieeAt.ToString("dd/MM/yyyy")</small>
+                @if (User.Identity?.IsAuthenticated ?? false && User.IsInRole("Candidat"))
+                {
+                    if (hasApplied)
+                    {
+                        <span class="badge badge-secondary ms-2">Déjà postulé</span>
+                    }
+                }
                 @if (User.Identity?.IsAuthenticated ?? false)
                 {
                     if (User.IsInRole("Candidat"))

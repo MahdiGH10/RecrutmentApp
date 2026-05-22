@@ -24,6 +24,7 @@ else
                 <p class="eyebrow">@Model.Offre.Type</p>
                 <h1>@Model.Offre.Titre</h1>
                 <p class="detail-subtitle">@Model.Offre.Zone · @Model.Offre.ExperienceRequise ans d’expérience</p>
+                <p class="detail-company">@(!string.IsNullOrWhiteSpace(Model.Offre.Recruteur?.CompanyName) ? Model.Offre.Recruteur.CompanyName : string.Concat(Model.Offre.Recruteur?.Nom, " ", Model.Offre.Recruteur?.Prenom).Trim())</p>
             </div>
             <span class="badge badge-actif">@((Model.Offre.IsActive) ? "Active" : "Inactive")</span>
         </div>

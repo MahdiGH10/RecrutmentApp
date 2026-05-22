@@ -25,6 +25,7 @@
         <p class="eyebrow">Ajouter</p>
         <h2 class="panel-title">Téléverser un document</h2>
         <form asp-action="UploadDocument" method="post" enctype="multipart/form-data" class="auth-form">
+            @Html.AntiForgeryToken()
             <div>
                 <label class="form-label" for="Nom">Nom du document</label>
                 <input name="Nom" class="form-control" value="@uploadModel.Nom" placeholder="CV Mahdi 2026" />
@@ -41,7 +42,7 @@
             </div>
             <div>
                 <label class="form-label">Fichier</label>
-                <input name="File" type="file" class="form-control document-upload-input" />
+                <input name="File" type="file" accept=".pdf,.doc,.docx,.png,.jpg" class="form-control document-upload-input" />
             </div>
             <button type="submit" class="btn btn-primary">Ajouter le document</button>
         </form>
